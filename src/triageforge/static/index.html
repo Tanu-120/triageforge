@@ -1,103 +1,295 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TriageForge Console</title>
+<title>TriageForge — AI Ticket Triage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f4ef;--card:#fff;--ink:#1d1b16;--mute:#6b665a;--line:#e4dfd2;--acc:#e8590c;--ok:#2b8a3e;--warn:#e67700;--bad:#c92a2a;--pii:#fff3bf;box-sizing:border-box}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#14130f;--card:#1e1c16;--ink:#f1ede2;--mute:#9a9484;--line:#322f26;--pii:#4a3f0a}}
-:root[data-theme=dark]{--bg:#14130f;--card:#1e1c16;--ink:#f1ede2;--mute:#9a9484;--line:#322f26;--pii:#4a3f0a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line)}
-.logo{font-weight:800;letter-spacing:-.5px;font-size:20px}.logo b{color:var(--acc)}
-.sp{flex:1}.pill{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}
-button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px}
-button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button:disabled{opacity:.5;cursor:wait}
-main{max-width:1100px;margin:0 auto;padding:20px;display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
-@media(max-width:820px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
-textarea,input,select{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
-textarea{min-height:130px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
-.shield{margin-top:10px;font-size:13px;color:var(--mute)}.shield .view{margin-top:6px;padding:8px;border-radius:8px;background:var(--bg);white-space:pre-wrap;word-break:break-word;color:var(--ink)}
-.tag{background:var(--pii);padding:0 4px;border-radius:4px;font-weight:600}
-.badge{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:700;font-size:13px;color:#fff}
-.urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:#1971c2}.low{background:var(--ok)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.k{font-size:12px;color:var(--mute)}.v{font-weight:600}
-.bar{height:8px;border-radius:9px;background:var(--bg);border:1px solid var(--line);overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .4s}
-.reply{white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:10px;margin-top:6px}
-.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
-.okmsg{color:var(--ok);font-size:13px;margin-top:8px;min-height:18px}
-.hist div{padding:8px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13px}
-.hist span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-#auth{max-width:400px;margin:60px auto;padding:20px}
-#auth .hint{font-size:12px;color:var(--mute);margin:-4px 0 12px}
-.field{margin-bottom:12px}.field label{display:block;font-size:12px;color:var(--mute);margin-bottom:4px}
-.pw-wrap{position:relative;display:flex;align-items:center}
-.pw-wrap input{padding-right:44px;margin:0}
-.pw-wrap .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);padding:6px 10px;line-height:1;font-size:16px}
-.pw-wrap .eye:hover{color:var(--ink)}
-.hide{display:none!important}.empty{color:var(--mute);font-size:14px}
-</style></head><body>
-<header><div class="logo">Triage<b>Forge</b></div><span class="pill" id="prov">…</span><div class="sp"></div>
-<span class="pill hide" id="who"></span><button type="button" id="theme" title="Toggle theme">◐</button><button type="button" id="out" class="hide">Sign out</button></header>
+:root{
+  --bg0:#0b1220; --bg1:#121c2e; --panel:#162235; --ink:#e8eef8; --mute:#93a0b8;
+  --line:rgba(148,168,198,.22); --acc:#2dd4bf; --acc2:#38bdf8; --warn:#f59e0b;
+  --bad:#f87171; --ok:#34d399; --pii:#fde68a; --shadow:0 18px 50px rgba(0,0,0,.35);
+  --radius:18px; --font:"IBM Plex Sans",sans-serif; --display:"Space Grotesk",sans-serif; --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--ink);font:15px/1.5 var(--font);background:var(--bg0)}
+body{
+  background:
+    radial-gradient(900px 500px at 10% -10%, rgba(45,212,191,.18), transparent 55%),
+    radial-gradient(700px 420px at 95% 0%, rgba(56,189,248,.16), transparent 50%),
+    linear-gradient(180deg, var(--bg0), var(--bg1) 40%, #0a101c);
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.35;
+  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:48px 48px; mask-image:radial-gradient(circle at 50% 20%, #000 20%, transparent 75%);
+}
+a{color:var(--acc2); text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer; border:1px solid var(--line); background:rgba(255,255,255,.04); border-radius:12px; padding:10px 14px; transition:transform .15s ease, background .2s ease, border-color .2s ease}
+button:hover{background:rgba(255,255,255,.08); border-color:rgba(45,212,191,.45)}
+button:active{transform:translateY(1px)}
+button.primary{background:linear-gradient(135deg, var(--acc), #14b8a6); border-color:transparent; color:#042f2e; font-weight:700}
+button.primary:hover{filter:brightness(1.05); border-color:transparent}
+button:disabled{opacity:.55; cursor:wait; transform:none}
+.hide{display:none!important}
 
-<section id="auth" class="card">
- <h2>Sign in</h2>
- <p class="hint">Username: letters, numbers, underscore (3–32). Password: at least 8 characters.</p>
- <div class="field"><label for="u">Username</label>
-  <input id="u" name="username" placeholder="e.g. demo_user" autocomplete="username" spellcheck="false"></div>
- <div class="field"><label for="pw">Password</label>
-  <div class="pw-wrap">
-   <input id="pw" name="password" type="password" placeholder="min 8 characters" autocomplete="current-password">
-   <button type="button" class="eye" id="eye" title="Show password" aria-label="Show password">👁</button>
-  </div></div>
- <div class="row">
-  <button type="button" class="p" id="login">Sign in</button>
-  <button type="button" id="reg">Create account</button>
- </div>
- <div class="err" id="aerr"></div>
- <div class="okmsg" id="aok"></div>
-</section>
+.shell{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:20px 20px 48px}
+.top{display:flex; align-items:center; gap:14px; margin-bottom:22px; animation:rise .5s ease both}
+.brand{display:flex; align-items:center; gap:12px}
+.mark{width:42px;height:42px;border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(145deg, rgba(45,212,191,.95), rgba(56,189,248,.75)); color:#042f2e; font:700 18px/1 var(--display); box-shadow:0 8px 24px rgba(45,212,191,.25)}
+.brand h1{margin:0; font:700 28px/1 var(--display); letter-spacing:-.03em}
+.brand h1 span{color:var(--acc)}
+.brand p{margin:2px 0 0; color:var(--mute); font-size:13px}
+.sp{flex:1}
+.meta{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.chip{font:500 12px/1 var(--mono); padding:7px 10px; border-radius:999px; border:1px solid var(--line); color:var(--mute); background:rgba(8,15,28,.55)}
+.chip.on{color:#042f2e; background:var(--acc); border-color:transparent}
+.chip.warn{color:#422006; background:var(--warn); border-color:transparent}
 
-<main id="app" class="hide">
-<div>
- <div class="card"><h2>Ticket</h2>
-  <textarea id="text" placeholder="Paste a customer ticket…"></textarea>
-  <div class="row" id="samples"></div>
-  <div class="shield">🛡 <b>PII shield</b> — what the model will actually see:<div class="view" id="shield">(nothing yet)</div></div>
-  <div class="row"><select id="tier" style="width:auto"><option value="">tier: any</option><option>free</option><option>pro</option><option>enterprise</option></select>
-  <div class="sp"></div><button type="button" class="p" id="go">Triage ticket</button></div><div class="err" id="err"></div></div>
- <div class="card" style="margin-top:16px"><h2>Session history</h2><div class="hist" id="hist"><div class="empty" style="border:0;cursor:default">No tickets yet.</div></div></div>
+.hero-auth{display:grid; grid-template-columns:1.15fr .85fr; gap:22px; align-items:stretch; min-height:calc(100vh - 120px); animation:rise .55s .05s ease both}
+@media(max-width:900px){.hero-auth{grid-template-columns:1fr; min-height:auto}}
+.pitch{padding:28px 8px 8px}
+.pitch .eyebrow{font:600 12px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--acc)}
+.pitch h2{margin:12px 0 10px; font:700 clamp(32px,5vw,48px)/1.05 var(--display); letter-spacing:-.035em; max-width:14ch}
+.pitch h2 em{font-style:normal; color:var(--acc2)}
+.pitch .lede{margin:0 0 22px; color:var(--mute); max-width:46ch; font-size:16px}
+.pipeline{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px}
+.pipe{display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(22,34,53,.7); font-size:12px; color:var(--mute)}
+.pipe b{color:var(--ink); font-weight:600}
+.pipe i{width:6px;height:6px;border-radius:50%; background:var(--acc); display:inline-block; box-shadow:0 0 0 0 rgba(45,212,191,.7); animation:pulse 2s infinite}
+.features{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+@media(max-width:520px){.features{grid-template-columns:1fr}}
+.feat{padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:rgba(22,34,53,.55)}
+.feat strong{display:block; font-size:13px; margin-bottom:2px}
+.feat span{color:var(--mute); font-size:12px}
+
+.auth-panel{background:linear-gradient(180deg, rgba(22,34,53,.92), rgba(14,22,36,.92)); border:1px solid var(--line); border-radius:24px; padding:26px; box-shadow:var(--shadow); backdrop-filter:blur(10px)}
+.auth-panel h3{margin:0 0 6px; font:700 22px/1.2 var(--display)}
+.auth-panel .hint{margin:0 0 18px; color:var(--mute); font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block; margin-bottom:6px; font-size:12px; color:var(--mute); font-weight:500}
+.field input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:rgba(8,15,28,.65); outline:none; transition:border-color .2s, box-shadow .2s}
+.field input:focus{border-color:rgba(45,212,191,.7); box-shadow:0 0 0 3px rgba(45,212,191,.15)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:48px}
+.eye{position:absolute; right:6px; top:50%; transform:translateY(-50%); border:0; background:transparent; color:var(--mute); padding:8px; border-radius:8px}
+.eye:hover{color:var(--ink); background:rgba(255,255,255,.06)}
+.actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
+.actions button{flex:1; min-width:120px}
+.msg{min-height:18px; margin-top:12px; font-size:13px}
+.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
+.tiny{margin-top:14px; font-size:12px; color:var(--mute)}
+
+.app{animation:rise .45s ease both}
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:rgba(8,15,28,.45)}
+.seg button{border:0; border-radius:0; background:transparent; padding:9px 14px; color:var(--mute); font-weight:600; font-size:13px}
+.seg button.active{background:rgba(45,212,191,.18); color:var(--acc)}
+.grid{display:grid; grid-template-columns:1.15fr .85fr; gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:rgba(22,34,53,.72); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
+.panel h3{margin:0 0 12px; font:700 14px/1 var(--display); letter-spacing:.08em; text-transform:uppercase; color:var(--mute)}
+textarea,select{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:rgba(8,15,28,.65); outline:none}
+textarea{min-height:150px; resize:vertical; line-height:1.45}
+textarea:focus,select:focus{border-color:rgba(45,212,191,.7); box-shadow:0 0 0 3px rgba(45,212,191,.15)}
+.samples{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0}
+.samples button{font-size:12px; padding:8px 11px; border-radius:999px}
+.shield{margin-top:8px; padding:12px; border-radius:14px; border:1px dashed rgba(253,230,138,.45); background:rgba(253,230,138,.06)}
+.shield .label{font:600 11px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--pii); margin-bottom:8px}
+.shield .view{white-space:pre-wrap; word-break:break-word; font-size:13px; color:var(--ink)}
+.tag{background:rgba(253,230,138,.25); color:#fde68a; padding:1px 6px; border-radius:6px; font:600 12px var(--mono)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px}
+.bar{height:8px; border-radius:99px; background:rgba(8,15,28,.7); border:1px solid var(--line); overflow:hidden; margin:6px 0 12px}
+.bar i{display:block; height:100%; width:0; background:linear-gradient(90deg, var(--acc), var(--acc2)); transition:width .45s ease}
+.k{font-size:12px; color:var(--mute)}.v{font-weight:600}
+.stats{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 4px}
+.stat{padding:10px 12px; border-radius:12px; background:rgba(8,15,28,.45); border:1px solid var(--line)}
+.badge{display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font:700 12px/1 var(--mono); color:#04111a}
+.urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:var(--acc2)}.low{background:var(--ok)}
+.reply{margin-top:8px; padding:12px; border-radius:12px; background:rgba(8,15,28,.55); border:1px solid var(--line); white-space:pre-wrap}
+.hist{display:flex; flex-direction:column; gap:8px}
+.hist button{text-align:left; display:flex; gap:10px; align-items:center; width:100%}
+.hist .t{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; font-size:13px; color:var(--mute)}
+.empty{color:var(--mute); font-size:14px}
+.flow{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:16px}
+@media(max-width:800px){.flow{grid-template-columns:repeat(2,1fr)}}
+.step{padding:10px; border-radius:12px; border:1px solid var(--line); background:rgba(8,15,28,.35); font-size:12px; color:var(--mute); transition:border-color .25s, background .25s, transform .25s}
+.step b{display:block; color:var(--ink); margin-bottom:2px; font-size:12px}
+.step.active{border-color:rgba(45,212,191,.55); background:rgba(45,212,191,.1); color:var(--ink); transform:translateY(-1px)}
+.step.done{border-color:rgba(52,211,153,.45); background:rgba(52,211,153,.08)}
+.result-enter{animation:pop .35s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+@keyframes pop{from{opacity:0; transform:scale(.98)} to{opacity:1; transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(45,212,191,.55)} 70%{box-shadow:0 0 0 8px rgba(45,212,191,0)} 100%{box-shadow:0 0 0 0 rgba(45,212,191,0)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">TF</div>
+      <div>
+        <h1>Triage<span>Forge</span></h1>
+        <p>Enterprise JWT · Pydantic v2 · Local open LLM</p>
+      </div>
+    </div>
+    <div class="sp"></div>
+    <div class="meta">
+      <span class="chip" id="prov">model: …</span>
+      <span class="chip hide" id="who"></span>
+      <a class="chip" href="/docs" target="_blank" rel="noreferrer">OpenAPI</a>
+      <button type="button" id="out" class="hide">Sign out</button>
+    </div>
+  </header>
+
+  <!-- AUTH -->
+  <section id="auth" class="hero-auth">
+    <div class="pitch">
+      <div class="eyebrow">Week 2 · Production AI microservice</div>
+      <h2>Turn messy tickets into <em>trusted</em> triage JSON.</h2>
+      <p class="lede">A container-ready FastAPI service: JWT auth, PII redaction before inference, schema-checked model output, rate limits, and versioned contracts.</p>
+      <div class="pipeline">
+        <div class="pipe"><i></i><b>1</b> JWT</div>
+        <div class="pipe"><i></i><b>2</b> Validate</div>
+        <div class="pipe"><i></i><b>3</b> Redact PII</div>
+        <div class="pipe"><i></i><b>4</b> Infer</div>
+        <div class="pipe"><i></i><b>5</b> Re-validate</div>
+      </div>
+      <div class="features">
+        <div class="feat"><strong>JWT + bcrypt</strong><span>OAuth2 password flow, expiring tokens</span></div>
+        <div class="feat"><strong>Pydantic v2</strong><span>Request, response & model contracts</span></div>
+        <div class="feat"><strong>Open models</strong><span>Ollama local · Groq free tier · Mock</span></div>
+        <div class="feat"><strong>AI controls</strong><span>Rate limit + daily token quota</span></div>
+      </div>
+    </div>
+    <div class="auth-panel">
+      <h3>Access the console</h3>
+      <p class="hint">Username: letters, numbers, underscore (3–32). Password: 8+ characters.</p>
+      <div class="field">
+        <label for="u">Username</label>
+        <input id="u" autocomplete="username" spellcheck="false" placeholder="e.g. demo_user">
+      </div>
+      <div class="field">
+        <label for="pw">Password</label>
+        <div class="pw-wrap">
+          <input id="pw" type="password" autocomplete="current-password" placeholder="min 8 characters">
+          <button type="button" class="eye" id="eye" title="Show password" aria-label="Show password">Show</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="login">Sign in</button>
+        <button type="button" id="reg">Create account</button>
+      </div>
+      <div class="msg err" id="aerr"></div>
+      <div class="msg ok" id="aok"></div>
+      <p class="tiny">Tip: create an account once, then use Sign in. Hard-refresh if you don’t see the new UI.</p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="app" class="app hide">
+    <div class="flow" id="flow">
+      <div class="step" data-s="auth"><b>Auth</b>Bearer JWT</div>
+      <div class="step" data-s="validate"><b>Validate</b>Pydantic v2</div>
+      <div class="step" data-s="redact"><b>Redact</b>PII shield</div>
+      <div class="step" data-s="infer"><b>Infer</b>Open model</div>
+      <div class="step" data-s="contract"><b>Contract</b>Schema check</div>
+    </div>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="API version">
+        <button type="button" id="ver2" class="active">/v2/triage</button>
+        <button type="button" id="ver1">/v1/triage</button>
+      </div>
+      <span class="chip" id="verhint">Full triage: sentiment, reply, PII, latency</span>
+      <div class="sp"></div>
+      <a class="chip" href="/docs" target="_blank" rel="noreferrer">Swagger docs</a>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h3>Customer ticket</h3>
+          <textarea id="text" placeholder="Paste a support ticket…"></textarea>
+          <div class="samples" id="samples"></div>
+          <div class="shield">
+            <div class="label">PII shield — text the model will see</div>
+            <div class="view" id="shield">(nothing yet)</div>
+          </div>
+          <div class="row">
+            <select id="tier" style="width:auto;min-width:140px">
+              <option value="">tier: any</option>
+              <option>free</option><option>pro</option><option>enterprise</option>
+            </select>
+            <div class="sp"></div>
+            <button type="button" class="primary" id="go">Triage ticket</button>
+          </div>
+          <div class="msg err" id="err"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <h3>Session history</h3>
+          <div class="hist" id="hist"><div class="empty">No tickets yet — try a sample above.</div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Triage result</h3>
+          <div id="res" class="empty">Run a ticket to see validated JSON fields.</div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>Your AI controls</h3>
+          <div class="k">Tokens today <span id="tk"></span></div>
+          <div class="bar"><i id="tkb"></i></div>
+          <div class="k">Requests this minute <span id="rq"></span></div>
+          <div class="bar"><i id="rqb"></i></div>
+          <p class="tiny" style="margin:0">Exceeding limits returns HTTP 429 with Retry-After — production AI hygiene.</p>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <h3>Assignment coverage</h3>
+          <div class="features" style="grid-template-columns:1fr">
+            <div class="feat"><strong>JWT authentication</strong><span>You’re signed in with a short-lived Bearer token</span></div>
+            <div class="feat"><strong>Pydantic v2 validation</strong><span>Bad payloads → 422; model JSON re-checked</span></div>
+            <div class="feat"><strong>Open model / free tier</strong><span id="covprov">Provider status loading…</span></div>
+            <div class="feat"><strong>Container-ready</strong><span>Docker multi-stage + compose + CI</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
-<div>
- <div class="card"><h2>Result</h2><div id="res" class="empty">Run a ticket to see the triage.</div></div>
- <div class="card" style="margin-top:16px"><h2>Your limits</h2>
-  <div class="k">Tokens today <span id="tk"></span></div><div class="bar"><i id="tkb"></i></div>
-  <div class="k">Requests this minute <span id="rq"></span></div><div class="bar"><i id="rqb"></i></div></div>
-</div></main>
 
 <script>
 const $=id=>document.getElementById(id);
-let token=sessionStorage.getItem("tf_token"),user=sessionStorage.getItem("tf_user"),hist=[];
-const SAMPLES={"💳 Double charge":"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable.",
-"🐞 App crash":"The mobile app crashes with an error every time I open the invoices tab. Started after the last update.",
-"✨ Feature idea":"It would be great if you could export reports to CSV. Not urgent, just a suggestion from our team.",
-"🔑 Locked out":"I cannot login, the password reset email never arrives. Card on file 4242 4242 4242 4242 if you need to verify."};
-const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
+let token=sessionStorage.getItem("tf_token");
+let user=sessionStorage.getItem("tf_user");
+let hist=[];
+let apiVer="v2";
 const USER_RE=/^[a-zA-Z0-9_]{3,32}$/;
+const SAMPLES={
+  "Double charge":"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable.",
+  "App crash":"The mobile app crashes with an error every time I open the invoices tab. Started after the last update.",
+  "Feature idea":"It would be great if you could export reports to CSV. Not urgent, just a suggestion from our team.",
+  "Locked out":"I cannot login, the password reset email never arrives. Card on file 4242 4242 4242 4242 if you need to verify."
+};
+const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
 
-function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function el(t,c,x){const e=document.createElement(t); if(c)e.className=c; if(x!==undefined)e.textContent=x; return e}
 
 function detailMessage(d,status){
   if(!d) return "HTTP "+status;
   let m=d.detail;
-  if(Array.isArray(m)){
-    return m.map(x=>{
-      const field=(x.loc||[]).filter(p=>p!=="body"&&p!=="query").join(".")||"field";
-      return field+": "+(x.msg||"invalid");
-    }).join("; ");
-  }
+  if(Array.isArray(m)) return m.map(x=>{
+    const field=(x.loc||[]).filter(p=>p!=="body"&&p!=="query").join(".")||"field";
+    return field+": "+(x.msg||"invalid");
+  }).join("; ");
   if(typeof m==="string") return m;
   return "HTTP "+status;
 }
@@ -107,11 +299,11 @@ async function api(path,opt={}){
   if(token) h.Authorization="Bearer "+token;
   const r=await fetch(path,{...opt,headers:h});
   let d=null; try{d=await r.json()}catch{}
-  if(r.status===401&&token&&!path.includes("/auth/")){logout();throw new Error("Session expired — sign in again")}
+  if(r.status===401&&token&&!path.includes("/auth/")){logout(); throw new Error("Session expired — sign in again")}
   if(!r.ok){
     let m=detailMessage(d,r.status);
     if(r.status===429) m=(m||"Rate limited")+" — retry in "+(r.headers.get("Retry-After")||"?")+"s";
-    if(r.status===409) m="Username already taken — try Sign in instead";
+    if(r.status===409) m="Username already taken — use Sign in instead";
     throw new Error(m||("HTTP "+r.status));
   }
   return d;
@@ -122,18 +314,18 @@ function show(authed){
   $("app").classList.toggle("hide",!authed);
   $("out").classList.toggle("hide",!authed);
   $("who").classList.toggle("hide",!authed);
-  $("who").textContent=(user||"");
+  $("who").textContent=user?("@"+user):"";
+  if(authed) setFlow(["auth"],[]);
 }
 
-function logout(){token=user=null;sessionStorage.clear();show(false);$("aerr").textContent="";$("aok").textContent=""}
+function logout(){token=user=null; sessionStorage.clear(); show(false); $("aerr").textContent=""; $("aok").textContent=""}
 
 function validateCreds(){
   const u=$("u").value.trim(), p=$("pw").value;
   if(!u) return "Enter a username";
-  if(!USER_RE.test(u)) return "Username must be 3–32 chars: letters, numbers, underscore only (no spaces or email)";
+  if(!USER_RE.test(u)) return "Username must be 3–32 chars: letters, numbers, underscore only";
   if(!p) return "Enter a password";
   if(p.length<8) return "Password must be at least 8 characters";
-  if(p.length>72) return "Password must be at most 72 characters";
   return null;
 }
 
@@ -146,23 +338,18 @@ function setBusy(busy){
 async function signin(register){
   $("aerr").textContent=""; $("aok").textContent="";
   const problem=validateCreds();
-  if(problem){$("aerr").textContent=problem;return}
+  if(problem){$("aerr").textContent=problem; return}
   const u=$("u").value.trim(), p=$("pw").value;
   setBusy(true);
   try{
     if(register){
-      await api("/v1/auth/register",{
-        method:"POST",
-        headers:{"content-type":"application/json"},
-        body:JSON.stringify({username:u,password:p})
-      });
+      await api("/v1/auth/register",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({username:u,password:p})});
       $("aok").textContent="Account created — signing you in…";
     }
-    const body=new URLSearchParams({username:u,password:p});
     const d=await api("/v1/auth/token",{
       method:"POST",
       headers:{"content-type":"application/x-www-form-urlencoded"},
-      body
+      body:new URLSearchParams({username:u,password:p})
     });
     token=d.access_token; user=u;
     sessionStorage.setItem("tf_token",token);
@@ -174,9 +361,17 @@ async function signin(register){
   }finally{setBusy(false)}
 }
 
+function setFlow(active,done){
+  document.querySelectorAll("#flow .step").forEach(s=>{
+    s.classList.toggle("active", active.includes(s.dataset.s));
+    s.classList.toggle("done", done.includes(s.dataset.s));
+  });
+}
+
 function shield(){
   const box=$("shield"); box.textContent="";
-  let t=$("text").value; if(!t){box.textContent="(nothing yet)";return}
+  let t=$("text").value;
+  if(!t){box.textContent="(nothing yet)"; return}
   for(const[l,re]of PII) t=t.replace(re,"\u0001"+l+"\u0002");
   t.split(/(\u0001\w+\u0002)/).forEach(s=>{
     if(s[0]==="\u0001") box.appendChild(el("span","tag","["+s.slice(1,-1)+"]"));
@@ -197,74 +392,112 @@ async function usage(){
 }
 
 function render(d){
-  const r=$("res"); r.className=""; r.textContent="";
+  const r=$("res"); r.className="result-enter"; r.textContent="";
   const top=el("div","row"); top.style.marginTop="0";
-  top.append(
-    el("span","badge "+d.priority,d.priority.toUpperCase()),
-    el("span","chip",d.category.replace("_"," ")),
-    el("span","chip",d.sentiment),
-    el("span","chip",d.ticket_id)
-  );
-  r.append(top); r.append(el("p","",d.summary));
-  const g=el("div","grid");
-  [["Confidence",Math.round(d.confidence*100)+"%"],["Latency",d.latency_ms+" ms"],["Model",d.model],["Tokens",d.usage.prompt_tokens+" in / "+d.usage.completion_tokens+" out"]]
-    .forEach(([k,v])=>{const c=el("div");c.append(el("div","k",k),el("div","v",v));g.append(c)});
+  top.append(el("span","badge "+d.priority,d.priority.toUpperCase()));
+  top.append(el("span","chip",d.category.replaceAll("_"," ")));
+  if(d.sentiment) top.append(el("span","chip",d.sentiment));
+  top.append(el("span","chip",d.ticket_id));
+  r.append(top);
+  r.append(el("p","",d.summary));
+  const g=el("div","stats");
+  const rows=[
+    ["Model", d.model],
+    ["Tokens", `${d.usage.prompt_tokens} in / ${d.usage.completion_tokens} out`]
+  ];
+  if(d.confidence!=null) rows.unshift(["Confidence", Math.round(d.confidence*100)+"%"]);
+  if(d.latency_ms!=null) rows.splice(1,0,["Latency", d.latency_ms+" ms"]);
+  rows.forEach(([k,v])=>{const c=el("div","stat"); c.append(el("div","k",k), el("div","v",v)); g.append(c)});
   r.append(g);
-  const cb=el("div","bar"); const ci=el("i"); ci.style.width=d.confidence*100+"%"; cb.append(ci); r.append(cb);
-  const pk=Object.entries(d.pii_redacted||{});
-  r.append(el("div","k","PII masked before inference"),el("div","v",pk.length?pk.map(([k,v])=>`${v} ${k}`).join(", "):"none found"));
-  const hd=el("div","row"); hd.append(el("div","k","Suggested reply"),el("div","sp"));
-  const cp=el("button","","Copy"); cp.type="button";
-  cp.onclick=()=>{navigator.clipboard.writeText(d.suggested_reply);cp.textContent="Copied ✓"};
-  hd.append(cp); r.append(hd,el("div","reply",d.suggested_reply));
+  if(d.confidence!=null){
+    const cb=el("div","bar"); const ci=el("i"); ci.style.width=(d.confidence*100)+"%"; cb.append(ci); r.append(cb);
+  }
+  if(d.pii_redacted){
+    const pk=Object.entries(d.pii_redacted);
+    r.append(el("div","k","PII masked before inference"));
+    r.append(el("div","v", pk.length? pk.map(([k,v])=>`${v} ${k}`).join(", ") : "none found"));
+  }
+  if(d.suggested_reply){
+    const hd=el("div","row");
+    hd.append(el("div","k","Suggested reply"), el("div","sp"));
+    const cp=el("button","","Copy"); cp.type="button";
+    cp.onclick=()=>{navigator.clipboard.writeText(d.suggested_reply); cp.textContent="Copied"};
+    hd.append(cp); r.append(hd, el("div","reply", d.suggested_reply));
+  } else {
+    r.append(el("p","tiny","v1 contract: classification fields only (no reply / sentiment / PII report)."));
+  }
 }
 
 function addHist(t,d){
-  hist.unshift({t,d}); const h=$("hist"); h.textContent="";
+  hist.unshift({t,d});
+  const h=$("hist"); h.textContent="";
   hist.slice(0,8).forEach(x=>{
-    const row=el("div");
-    row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()),el("span","t",x.t));
-    row.onclick=()=>render(x.d); h.append(row);
+    const row=el("button"); row.type="button";
+    row.append(el("span","badge "+x.d.priority, x.d.priority[0].toUpperCase()), el("span","t", x.t));
+    row.onclick=()=>render(x.d);
+    h.append(row);
   });
 }
 
 async function go(){
   $("err").textContent="";
   const text=$("text").value.trim();
+  if(text.length<10){$("err").textContent="Ticket must be at least 10 characters"; return}
   const body={text}; if($("tier").value) body.customer_tier=$("tier").value;
   $("go").disabled=true; $("go").textContent="Thinking…";
+  setFlow(["validate","redact","infer"], ["auth"]);
   try{
-    const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    const path=apiVer==="v1"?"/v1/triage":"/v2/triage";
+    const d=await api(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    setFlow([], ["auth","validate","redact","infer","contract"]);
     render(d); addHist(text,d);
-  }catch(e){$("err").textContent=e.message}
+  }catch(e){
+    setFlow(["auth"],[]);
+    $("err").textContent=e.message;
+  }
   $("go").disabled=false; $("go").textContent="Triage ticket"; usage();
+}
+
+function setVersion(v){
+  apiVer=v;
+  $("ver1").classList.toggle("active", v==="v1");
+  $("ver2").classList.toggle("active", v==="v2");
+  $("verhint").textContent=v==="v2"
+    ? "Full triage: sentiment, reply, PII, latency"
+    : "Frozen v1: category, priority, summary only";
 }
 
 $("eye").onclick=()=>{
   const pw=$("pw"); const show=pw.type==="password";
   pw.type=show?"text":"password";
-  $("eye").textContent=show?"🙈":"👁";
+  $("eye").textContent=show?"Hide":"Show";
   $("eye").title=show?"Hide password":"Show password";
-  $("eye").setAttribute("aria-label",show?"Hide password":"Show password");
+  $("eye").setAttribute("aria-label", $("eye").title);
 };
 
-Object.keys(SAMPLES).forEach(k=>{
-  const b=el("button","chip",k); b.type="button";
-  b.onclick=()=>{$("text").value=SAMPLES[k];shield()};
+Object.entries(SAMPLES).forEach(([k,v])=>{
+  const b=el("button","",k); b.type="button";
+  b.onclick=()=>{$("text").value=v; shield()};
   $("samples").append(b);
 });
+
 $("text").oninput=shield;
 $("go").onclick=go;
 $("login").onclick=()=>signin(false);
 $("reg").onclick=()=>signin(true);
 $("out").onclick=logout;
-$("pw").onkeydown=e=>{if(e.key==="Enter")signin(false)};
-$("u").onkeydown=e=>{if(e.key==="Enter")$("pw").focus()};
-$("theme").onclick=()=>{
-  const r=document.documentElement;
-  const dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#14130f";
-  r.dataset.theme=dark?"light":"dark";
-};
-fetch("/readyz").then(r=>r.json()).then(d=>$("prov").textContent="model: "+(d.provider||"offline")).catch(()=>$("prov").textContent="model: offline");
-if(token){show(true);usage()}
-</script></body></html>
+$("ver1").onclick=()=>setVersion("v1");
+$("ver2").onclick=()=>setVersion("v2");
+$("pw").onkeydown=e=>{if(e.key==="Enter") signin(false)};
+$("u").onkeydown=e=>{if(e.key==="Enter") $("pw").focus()};
+
+fetch("/readyz").then(r=>r.json()).then(d=>{
+  $("prov").textContent="model: "+(d.provider||"offline");
+  $("prov").classList.toggle("on", !!d.provider);
+  $("covprov").textContent="Active provider: "+(d.provider||"offline")+" (swap via PROVIDER env)";
+}).catch(()=>{$("prov").textContent="model: offline"; $("prov").classList.add("warn")});
+
+if(token){show(true); usage()}
+</script>
+</body>
+</html>
