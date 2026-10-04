@@ -24,6 +24,7 @@ button:hover{border-color:var(--acc)}
 button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
 button.primary:hover{filter:brightness(1.06)}
 button:disabled{opacity:.55;cursor:wait}
+button.ghost{background:var(--acc-soft);border-color:transparent;color:var(--acc);font-weight:700}
 .hide{display:none!important}
 .shell{max-width:1120px;margin:0 auto;padding:20px 20px 40px}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
@@ -34,13 +35,14 @@ button:disabled{opacity:.55;cursor:wait}
 .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .chip{font:500 11px var(--mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,252,247,.9);color:var(--mute)}
 .chip.ok{background:#ecfdf5;color:var(--ok);border-color:#a7f3d0}
+.toast{position:fixed;right:16px;bottom:16px;z-index:50;background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.25s}
+.toast.show{opacity:1;transform:none}
 
-/* Auth */
 .auth-wrap{max-width:420px;margin:48px auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
 .auth-wrap h2{margin:0 0 6px;font:700 28px/1.15 var(--display)}
 .auth-wrap .sub{margin:0 0 20px;color:var(--mute);font-size:14px}
 .field{margin-bottom:14px}
-.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.02em}
+.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute)}
 .field input,.field select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
 .field input:focus,.field select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
 .pw-wrap{position:relative}
@@ -51,7 +53,6 @@ button:disabled{opacity:.55;cursor:wait}
 .msg{min-height:18px;margin-top:12px;font-size:13px}
 .msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
 
-/* App layout */
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
 @media(max-width:900px){.layout{grid-template-columns:1fr}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
@@ -61,22 +62,22 @@ button:disabled{opacity:.55;cursor:wait}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
 .form-grid .full{grid-column:1/-1}
-textarea{min-height:130px;resize:vertical;line-height:1.45}
+textarea{min-height:120px;resize:vertical;line-height:1.45}
 .samples{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
-.samples button{font-size:12px;padding:7px 11px;border-radius:999px;background:#fff}
+.samples button{font-size:12px;padding:7px 11px;border-radius:999px}
+.hint-box{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--acc-soft);color:#115e59;font-size:12px;display:none}
+.hint-box.show{display:block}
 .pii{margin-top:14px;padding:12px 14px;border-radius:12px;background:#fffbeb;border:1px solid #f1e0a8}
 .pii .lbl{font:700 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin-bottom:8px}
-.pii .view{font-size:13px;line-height:1.5;word-break:break-word}
 .tag{background:#fde68a;color:#78350f;padding:1px 6px;border-radius:5px;font:600 12px var(--mono)}
-.foot-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.foot-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
 
-/* Results */
 .result-empty{padding:28px 8px;text-align:center;color:var(--mute)}
 .result-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
 .badge{display:inline-flex;padding:5px 11px;border-radius:999px;font:700 11px/1 var(--mono);color:#fff;text-transform:uppercase}
 .urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:var(--info)}.low{background:var(--ok)}
 .pill{display:inline-flex;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font:500 12px var(--mono);color:var(--mute)}
-.summary{margin:0 0 18px;font-size:15px;line-height:1.55}
+.summary{margin:0 0 14px;font-size:15px;line-height:1.55}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .metric{padding:12px 14px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line)}
 .metric .k{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
@@ -84,19 +85,20 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
 .block{margin-bottom:16px}
 .block h4{margin:0 0 8px;font:700 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .sev-row{display:flex;align-items:center;gap:12px}
-.sev-row strong{font-variant-numeric:tabular-nums;min-width:36px}
 .meter{flex:1;height:10px;border-radius:99px;background:#e8e0d2;overflow:hidden}
 .meter i{display:block;height:100%;background:linear-gradient(90deg,#047857,#c2410c,#b91c1c)}
 .banner{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.4;margin-bottom:16px}
 .banner.safe{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
 .banner.hot{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
 .list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
-.list li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
+.list li{display:flex;gap:10px;padding:10px 12px;border-radius:10px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
 .list li b{color:var(--acc);font:700 12px var(--mono);min-width:18px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips span{padding:6px 10px;border-radius:8px;background:#fff;border:1px solid var(--line);font-size:12px}
+.note{padding:12px 14px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line);font-size:13px;line-height:1.5}
 .reply-box{padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);line-height:1.55;font-size:14px;white-space:pre-wrap}
-.reply-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.reply-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.fb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .hist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .hist button{width:100%;text-align:left;display:flex;gap:10px;align-items:center;padding:10px 12px}
 .hist .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mute)}
@@ -106,12 +108,13 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
 </style>
 </head>
 <body>
+<div id="toast" class="toast"></div>
 <div class="shell">
   <header class="top">
     <div class="mark">TF</div>
     <div class="brand">
       <h1>TriageForge Ops</h1>
-      <p>Analyst intake → AI ops pack</p>
+      <p>Suggest → intake → ops pack → feedback</p>
     </div>
     <div class="sp"></div>
     <div class="meta">
@@ -121,10 +124,9 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
     </div>
   </header>
 
-  <!-- AUTH -->
   <section id="auth" class="auth-wrap">
     <h2>Sign in</h2>
-    <p class="sub">Create an analyst account to triage tickets. Username: letters/numbers/_ · Password: 8+ chars.</p>
+    <p class="sub">Create an analyst account. Username: letters/numbers/_ · Password: 8+ chars.</p>
     <div class="field"><label for="u">Username</label>
       <input id="u" autocomplete="username" spellcheck="false" placeholder="ops_analyst"></div>
     <div class="field"><label for="pw">Password</label>
@@ -140,18 +142,26 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
     <div class="msg ok" id="aok"></div>
   </section>
 
-  <!-- APP -->
   <section id="app" class="hide">
     <div class="layout">
-      <!-- LEFT: intake form -->
       <div class="card">
         <h3>Ticket intake</h3>
-        <p class="desc">Select category and priority first, then paste the customer message.</p>
+        <p class="desc">Paste a message, auto-suggest labels, adjust category/priority, then generate the ops pack.</p>
 
         <div class="form-grid">
+          <div class="field full">
+            <label for="text"><span class="stepno">1</span>Customer message</label>
+            <textarea id="text" placeholder="Paste the customer ticket here…"></textarea>
+            <div class="samples" id="samples"></div>
+            <div class="foot-actions" style="border:0;padding-top:10px;margin-top:10px;justify-content:flex-start">
+              <button type="button" class="ghost" id="suggest">Auto-suggest category & priority</button>
+            </div>
+            <div class="hint-box" id="suggestHint"></div>
+          </div>
+
           <div class="field">
-            <label for="category"><span class="stepno">1</span>Category</label>
-            <select id="category" required>
+            <label for="category"><span class="stepno">2</span>Category</label>
+            <select id="category">
               <option value="">Select category…</option>
               <option value="billing">Billing</option>
               <option value="refund">Refund</option>
@@ -168,8 +178,8 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
             </select>
           </div>
           <div class="field">
-            <label for="priority"><span class="stepno">2</span>Priority</label>
-            <select id="priority" required>
+            <label for="priority"><span class="stepno">3</span>Priority</label>
+            <select id="priority">
               <option value="">Select priority…</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -177,39 +187,32 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
               <option value="urgent">Urgent</option>
             </select>
           </div>
-          <div class="field full">
-            <label for="text"><span class="stepno">3</span>Customer message</label>
-            <textarea id="text" placeholder="Paste the customer ticket here…"></textarea>
-            <div class="samples" id="samples"></div>
-          </div>
+
           <div class="field">
             <label for="tier"><span class="stepno">4</span>Customer tier</label>
-            <select id="tier">
-              <option value="">Any</option>
-              <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
-            </select>
+            <select id="tier"><option value="">Any</option><option>free</option><option>pro</option><option>enterprise</option></select>
           </div>
           <div class="field">
             <label for="channel">Channel</label>
-            <select id="channel">
-              <option value="">Unknown</option>
-              <option value="email">Email</option>
-              <option value="chat">Chat</option>
-              <option value="phone">Phone</option>
-              <option value="social">Social</option>
+            <select id="channel"><option value="">Unknown</option><option>email</option><option>chat</option><option>phone</option><option>social</option></select>
+          </div>
+          <div class="field">
+            <label for="tone">Reply tone</label>
+            <select id="tone">
+              <option value="empathetic">Empathetic</option>
+              <option value="formal">Formal</option>
+              <option value="brief">Brief</option>
             </select>
           </div>
-          <div class="field full">
-            <label for="product">Product area (optional)</label>
-            <input id="product" placeholder="e.g. checkout, mobile app, billing portal">
+          <div class="field">
+            <label for="product">Product area</label>
+            <input id="product" placeholder="e.g. checkout, mobile app">
           </div>
         </div>
 
         <div class="pii">
           <div class="lbl">PII shield — text sent to the model</div>
-          <div class="view" id="shield">(nothing yet)</div>
+          <div id="shield">(nothing yet)</div>
         </div>
 
         <div class="foot-actions">
@@ -219,35 +222,26 @@ textarea{min-height:130px;resize:vertical;line-height:1.45}
         <div class="msg err" id="err"></div>
       </div>
 
-      <!-- RIGHT: results -->
       <div>
         <div class="card">
           <h3>Operations result</h3>
-          <p class="desc">Queue, SLA, severity, risks, next actions, and customer reply.</p>
-          <div id="res"><div class="result-empty">Fill the intake form and click <b>Generate ops pack</b>.</div></div>
+          <p class="desc">SLA due time, rationale, internal note, reply, and feedback.</p>
+          <div id="res"><div class="result-empty">Generate an ops pack to see results here.</div></div>
         </div>
-
         <div class="card" style="margin-top:16px">
           <h3>Usage</h3>
-          <p class="desc" style="margin-bottom:10px">AI rate limit and daily token quota for your account.</p>
-          <div class="metrics">
+          <div class="metrics" style="margin:0">
             <div class="metric"><div class="k">Tokens today</div><div class="v" id="tk">—</div></div>
             <div class="metric"><div class="k">Requests / min</div><div class="v" id="rq">—</div></div>
           </div>
         </div>
-
         <div class="card" style="margin-top:16px">
           <h3>Session history</h3>
           <div class="hist" id="hist"><div class="result-empty" style="padding:12px">No tickets yet.</div></div>
         </div>
       </div>
     </div>
-
-    <p class="dev">
-      Developer links (for assignment / API review):
-      <a href="/docs" target="_blank" rel="noreferrer">OpenAPI docs</a>
-      <a href="/v1/taxonomy" target="_blank" rel="noreferrer">Taxonomy JSON</a>
-    </p>
+    <p class="dev">Developer: <a href="/docs" target="_blank" rel="noreferrer">OpenAPI</a> <a href="/v1/taxonomy" target="_blank" rel="noreferrer">Taxonomy</a></p>
   </section>
 </div>
 
@@ -257,22 +251,20 @@ let token=sessionStorage.getItem("tf_token"), user=sessionStorage.getItem("tf_us
 let hist=[], lastJson=null;
 const USER_RE=/^[a-zA-Z0-9_]{3,32}$/;
 const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
-
-// Samples pre-fill category + priority + text (guided demo)
 const SAMPLES=[
-  {label:"Billing dispute", category:"billing", priority:"urgent", tier:"pro", channel:"email",
+  {label:"Billing dispute", category:"billing", priority:"urgent", tier:"pro", channel:"email", tone:"empathetic",
    text:"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable."},
-  {label:"Security alert", category:"security", priority:"urgent", tier:"enterprise", channel:"email",
+  {label:"Security alert", category:"security", priority:"urgent", tier:"enterprise", channel:"email", tone:"formal",
    text:"I got an unauthorized login email. Please lock my account. Card on file 4242 4242 4242 4242 if you need to verify."},
-  {label:"Shipping delay", category:"shipping", priority:"high", tier:"pro", channel:"chat",
+  {label:"Shipping delay", category:"shipping", priority:"high", tier:"pro", channel:"chat", tone:"empathetic",
    text:"My order tracking shows no movement for 8 days. Delivery was promised last Friday. Need a replacement shipped soon."},
-  {label:"Cancellation risk", category:"cancellation", priority:"high", tier:"pro", channel:"email",
-   text:"I want to cancel my subscription today. Your product is terrible after the last update and I may escalate legally."},
-  {label:"Feature ask", category:"feature_request", priority:"low", tier:"free", channel:"chat",
+  {label:"Feature ask", category:"feature_request", priority:"low", tier:"free", channel:"chat", tone:"brief",
    text:"It would be great if you could export reports to CSV for our finance team. Not urgent, just a suggestion."}
 ];
 
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function toast(msg){const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200)}
+function pretty(s){return String(s||"").replaceAll("_"," ")}
 function detailMessage(d,status){
   if(!d) return "HTTP "+status;
   let m=d.detail;
@@ -320,9 +312,9 @@ async function signin(register){
     const d=await api("/v1/auth/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:new URLSearchParams({username:u,password:p})});
     token=d.access_token; user=u;
     sessionStorage.setItem("tf_token",token); sessionStorage.setItem("tf_user",u);
-    show(true); usage();
-  }catch(e){$("aerr").textContent=e.message;$("aok").textContent=""}
-  finally{$("login").disabled=$("reg").disabled=false; $("login").textContent="Sign in"; $("reg").textContent="Create account"}
+    show(true); usage(); toast("Signed in");
+  }catch(e){$("aerr").textContent=e.message}
+  finally{$("login").disabled=$("reg").disabled=false}
 }
 function shield(){
   const box=$("shield"); box.textContent="";
@@ -340,159 +332,158 @@ async function usage(){
     $("rq").textContent=`${u.requests_last_minute} / ${u.rate_limit_per_min}`;
   }catch{}
 }
-function pretty(s){return String(s||"").replaceAll("_"," ")}
-
+function fmtDue(iso){
+  try{return new Date(iso).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}
+  catch{return iso}
+}
 function render(d){
   lastJson=d;
   const r=$("res"); r.textContent="";
-
   const head=el("div","result-head");
-  head.append(el("span","badge "+d.priority, d.priority));
-  head.append(el("span","pill", pretty(d.category)));
-  if(d.sentiment) head.append(el("span","pill", d.sentiment));
-  head.append(el("span","pill", d.ticket_id));
+  head.append(el("span","badge "+d.priority,d.priority));
+  head.append(el("span","pill",pretty(d.category)));
+  if(d.sentiment) head.append(el("span","pill",d.sentiment));
+  head.append(el("span","pill",d.ticket_id));
   r.append(head);
+  r.append(el("p","summary",d.summary));
 
-  r.append(el("p","summary", d.summary));
+  if(d.assigned_queue==null){r.append(el("p","tiny","Classic response")); return}
 
-  if(d.assigned_queue!=null){
-    const metrics=el("div","metrics");
-    [
-      ["Queue", pretty(d.assigned_queue)],
-      ["SLA", d.sla_hours+" hours"],
-      ["Severity", d.severity_score+" / 10"],
-      ["Channel", pretty(d.channel||"unknown")],
-      ["Confidence", d.confidence!=null? Math.round(d.confidence*100)+"%":"—"],
-      ["Latency", (d.latency_ms??"—")+" ms"]
-    ].forEach(([k,v])=>{
-      const m=el("div","metric"); m.append(el("div","k",k), el("div","v",v)); metrics.append(m);
-    });
-    r.append(metrics);
+  const metrics=el("div","metrics");
+  [
+    ["Queue", pretty(d.assigned_queue)],
+    ["SLA", d.sla_hours+" hours"],
+    ["SLA due", d.sla_due_at? fmtDue(d.sla_due_at):"—"],
+    ["Severity", d.severity_score+" / 10"],
+    ["Tone", pretty(d.reply_tone||"empathetic")],
+    ["Confidence", Math.round((d.confidence||0)*100)+"%"]
+  ].forEach(([k,v])=>{const m=el("div","metric"); m.append(el("div","k",k),el("div","v",v)); metrics.append(m)});
+  r.append(metrics);
 
-    const sev=el("div","block");
-    sev.append(el("h4","","Severity"));
-    const row=el("div","sev-row");
-    row.append(el("strong","", String(d.severity_score)));
-    const meter=el("div","meter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); row.append(meter);
-    sev.append(row); r.append(sev);
+  const sev=el("div","block"); sev.append(el("h4","","Severity"));
+  const row=el("div","sev-row"); row.append(el("strong","",String(d.severity_score)));
+  const meter=el("div","meter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); row.append(meter);
+  sev.append(row); r.append(sev);
 
-    const banner=el("div", d.escalation_required?"banner hot":"banner safe");
-    banner.textContent=d.escalation_required
-      ? ("Escalation required — "+(d.escalation_reason||""))
-      : ("No escalation — "+(d.escalation_reason||"standard path"));
-    r.append(banner);
+  const banner=el("div", d.escalation_required?"banner hot":"banner safe");
+  banner.textContent=d.escalation_required?("Escalation required — "+d.escalation_reason):("No escalation — "+d.escalation_reason);
+  r.append(banner);
 
-    if(d.risk_flags?.length){
-      const b=el("div","block"); b.append(el("h4","","Risk flags"));
-      const c=el("div","chips"); d.risk_flags.forEach(f=>c.appendChild(el("span","",pretty(f)))); b.append(c); r.append(b);
-    }
-    if(d.keywords?.length){
-      const b=el("div","block"); b.append(el("h4","","Keywords"));
-      const c=el("div","chips"); d.keywords.forEach(f=>c.appendChild(el("span","",f))); b.append(c); r.append(b);
-    }
-    if(d.next_actions?.length){
-      const b=el("div","block"); b.append(el("h4","","Next actions"));
-      const ul=el("ul","list");
-      d.next_actions.forEach((a,idx)=>{const li=el("li"); li.append(el("b","",String(idx+1)), document.createTextNode(a)); ul.append(li)});
-      b.append(ul); r.append(b);
-    }
-    if(d.pii_redacted){
-      const pk=Object.entries(d.pii_redacted);
-      const b=el("div","block"); b.append(el("h4","","PII masked"));
-      b.append(el("div","tiny", pk.length? pk.map(([k,v])=>`${v} ${k}`).join(" · ") : "None found"));
-      r.append(b);
-    }
-    if(d.suggested_reply){
-      const b=el("div","block");
-      const tools=el("div","reply-tools");
-      tools.append(el("h4","","Suggested customer reply"));
-      const cp=el("button","","Copy reply"); cp.type="button";
-      cp.onclick=async()=>{await navigator.clipboard.writeText(d.suggested_reply); cp.textContent="Copied"; setTimeout(()=>cp.textContent="Copy reply",1000)};
-      tools.append(cp); b.append(tools);
-      b.append(el("div","reply-box", d.suggested_reply));
-      r.append(b);
-    }
-    const exportRow=el("div","foot-actions"); exportRow.style.borderTop="0"; exportRow.style.paddingTop="0";
-    const cj=el("button","","Copy full JSON"); cj.type="button";
-    cj.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(d,null,2)); cj.textContent="Copied JSON"; setTimeout(()=>cj.textContent="Copy full JSON",1000)};
-    exportRow.append(cj); r.append(exportRow);
-  } else {
-    r.append(el("p","tiny","Classic v1 fields only."));
+  if(d.rationale){const b=el("div","block"); b.append(el("h4","","Why this classification")); b.append(el("div","note",d.rationale)); r.append(b)}
+  if(d.internal_note){const b=el("div","block"); b.append(el("h4","","Internal note (agents only)")); b.append(el("div","note",d.internal_note)); r.append(b)}
+
+  if(d.risk_flags?.length){const b=el("div","block"); b.append(el("h4","","Risk flags")); const c=el("div","chips"); d.risk_flags.forEach(f=>c.appendChild(el("span","",pretty(f)))); b.append(c); r.append(b)}
+  if(d.keywords?.length){const b=el("div","block"); b.append(el("h4","","Keywords")); const c=el("div","chips"); d.keywords.forEach(f=>c.appendChild(el("span","",f))); b.append(c); r.append(b)}
+  if(d.next_actions?.length){
+    const b=el("div","block"); b.append(el("h4","","Next actions"));
+    const ul=el("ul","list"); d.next_actions.forEach((a,idx)=>{const li=el("li"); li.append(el("b","",String(idx+1)), document.createTextNode(a)); ul.append(li)});
+    b.append(ul); r.append(b);
   }
-}
 
+  if(d.suggested_reply){
+    const b=el("div","block");
+    const tools=el("div","reply-tools");
+    tools.append(el("h4","","Suggested customer reply"));
+    const cp=el("button","","Copy reply"); cp.type="button";
+    cp.onclick=async()=>{await navigator.clipboard.writeText(d.suggested_reply); toast("Reply copied")};
+    tools.append(cp); b.append(tools);
+    b.append(el("div","reply-box",d.suggested_reply));
+    r.append(b);
+  }
+
+  const fb=el("div","block"); fb.append(el("h4","","Was this triage helpful?"));
+  const rowfb=el("div","fb");
+  const up=el("button","","Helpful"); up.type="button";
+  const down=el("button","","Needs work"); down.type="button";
+  up.onclick=()=>sendFeedback(d.ticket_id,true);
+  down.onclick=()=>sendFeedback(d.ticket_id,false);
+  rowfb.append(up,down); fb.append(rowfb); r.append(fb);
+
+  const exportRow=el("div","foot-actions"); exportRow.style.borderTop="0"; exportRow.style.paddingTop="0";
+  const cj=el("button","","Copy JSON"); cj.type="button";
+  cj.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(d,null,2)); toast("JSON copied")};
+  const dl=el("button","","Download report"); dl.type="button";
+  dl.onclick=()=>downloadReport(d);
+  exportRow.append(cj,dl); r.append(exportRow);
+}
+async function sendFeedback(ticketId,helpful){
+  try{
+    await api("/v1/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ticket_id:ticketId,helpful})});
+    toast(helpful?"Thanks — marked helpful":"Thanks — we'll improve");
+  }catch(e){toast(e.message)}
+}
+function downloadReport(d){
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`${d.ticket_id}-ops-pack.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Report downloaded");
+}
 function addHist(t,d){
-  hist.unshift({t,d});
-  const h=$("hist"); h.textContent="";
+  hist.unshift({t,d}); const h=$("hist"); h.textContent="";
   hist.slice(0,6).forEach(x=>{
     const row=el("button"); row.type="button";
-    row.append(el("span","badge "+x.d.priority, x.d.priority[0].toUpperCase()));
+    row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()));
     row.append(el("span","t", pretty(x.d.category)+" · "+x.t));
-    row.onclick=()=>render(x.d);
-    h.append(row);
+    row.onclick=()=>render(x.d); h.append(row);
   });
 }
-
+async function suggest(){
+  $("err").textContent="";
+  const text=$("text").value.trim();
+  if(text.length<10){$("err").textContent="Paste a ticket first (10+ chars)"; return}
+  $("suggest").disabled=true; $("suggest").textContent="Suggesting…";
+  try{
+    const d=await api("/v2/suggest",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text})});
+    $("category").value=d.category;
+    $("priority").value=d.priority;
+    const box=$("suggestHint");
+    box.textContent=`Suggested ${pretty(d.category)} / ${d.priority} (${Math.round(d.confidence*100)}%): ${d.rationale}`;
+    box.classList.add("show");
+    toast("Category & priority filled");
+    usage();
+  }catch(e){$("err").textContent=e.message}
+  $("suggest").disabled=false; $("suggest").textContent="Auto-suggest category & priority";
+}
 async function go(){
   $("err").textContent="";
-  const category=$("category").value;
-  const priority=$("priority").value;
-  const text=$("text").value.trim();
-  if(!category){$("err").textContent="Step 1: select a category"; $("category").focus(); return}
-  if(!priority){$("err").textContent="Step 2: select a priority"; $("priority").focus(); return}
-  if(text.length<10){$("err").textContent="Step 3: paste a ticket (at least 10 characters)"; $("text").focus(); return}
-
-  const body={category, priority, text};
+  const category=$("category").value, priority=$("priority").value, text=$("text").value.trim();
+  if(!category){$("err").textContent="Select a category (or Auto-suggest)"; $("category").focus(); return}
+  if(!priority){$("err").textContent="Select a priority (or Auto-suggest)"; $("priority").focus(); return}
+  if(text.length<10){$("err").textContent="Paste a ticket (at least 10 characters)"; return}
+  const body={category,priority,text,reply_tone:$("tone").value||"empathetic"};
   if($("tier").value) body.customer_tier=$("tier").value;
   if($("channel").value) body.channel=$("channel").value;
   if($("product").value.trim()) body.product_area=$("product").value.trim();
-
   $("go").disabled=true; $("go").textContent="Generating…";
   try{
     const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    render(d); addHist(text,d);
+    render(d); addHist(text,d); toast("Ops pack ready");
   }catch(e){$("err").textContent=e.message}
   $("go").disabled=false; $("go").textContent="Generate ops pack"; usage();
 }
-
 function applySample(s){
-  $("category").value=s.category;
-  $("priority").value=s.priority;
-  $("text").value=s.text;
-  $("tier").value=s.tier||"";
-  $("channel").value=s.channel||"";
-  $("product").value="";
-  shield();
+  $("category").value=s.category; $("priority").value=s.priority; $("text").value=s.text;
+  $("tier").value=s.tier||""; $("channel").value=s.channel||""; $("tone").value=s.tone||"empathetic";
+  $("product").value=""; $("suggestHint").classList.remove("show"); shield();
 }
-
 function resetForm(){
-  $("category").value=""; $("priority").value=""; $("text").value="";
-  $("tier").value=""; $("channel").value=""; $("product").value="";
-  $("err").textContent=""; shield();
+  ["category","priority","text","tier","channel","product"].forEach(id=>$(id).value="");
+  $("tone").value="empathetic"; $("err").textContent=""; $("suggestHint").classList.remove("show"); shield();
 }
-
-$("eye").onclick=()=>{
-  const pw=$("pw"), show=pw.type==="password";
-  pw.type=show?"text":"password"; $("eye").textContent=show?"Hide":"Show";
-};
-SAMPLES.forEach(s=>{
-  const b=el("button","",s.label); b.type="button";
-  b.onclick=()=>applySample(s);
-  $("samples").append(b);
-});
+$("eye").onclick=()=>{const pw=$("pw"),show=pw.type==="password"; pw.type=show?"text":"password"; $("eye").textContent=show?"Hide":"Show"};
+SAMPLES.forEach(s=>{const b=el("button","",s.label); b.type="button"; b.onclick=()=>applySample(s); $("samples").append(b)});
 $("text").oninput=shield;
+$("suggest").onclick=suggest;
 $("go").onclick=go;
 $("reset").onclick=resetForm;
 $("login").onclick=()=>signin(false);
 $("reg").onclick=()=>signin(true);
 $("out").onclick=logout;
 $("pw").onkeydown=e=>{if(e.key==="Enter") signin(false)};
-
-fetch("/readyz").then(r=>r.json()).then(d=>{
-  $("prov").textContent="model: "+(d.provider||"offline");
-  if(d.provider) $("prov").classList.add("ok");
-}).catch(()=>{$("prov").textContent="model: offline"});
-
+fetch("/readyz").then(r=>r.json()).then(d=>{$("prov").textContent="model: "+(d.provider||"offline"); if(d.provider)$("prov").classList.add("ok")});
 if(token){show(true); usage()}
 </script>
 </body>

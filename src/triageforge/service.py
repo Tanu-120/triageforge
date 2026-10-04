@@ -1,25 +1,68 @@
 import time
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from pydantic import ValidationError
 
 from .providers import LLMProvider, ProviderError
 from .redaction import redact
 from .routing import QUEUE_BY_CATEGORY, SEVERITY, SLA_HOURS
-from .schemas import Channel, LLMTriage, Queue, TriageRequest, TriageV2, Usage
+from .schemas import (
+    Channel,
+    LLMTriage,
+    Queue,
+    ReplyTone,
+    SuggestRequest,
+    SuggestResponse,
+    TriageRequest,
+    TriageV2,
+    Usage,
+)
 
 SYSTEM = (
     "You are TriageForge, an enterprise support-operations engine. "
     "If the analyst already selected category/priority, respect those values. "
     "Assign an ops queue, set SLA hours, score severity (1-10), list risk flags, "
-    "keywords, concrete next actions, and draft a short polite reply. "
+    "keywords, concrete next actions, write an internal note, a short rationale, "
+    "and draft a customer reply in the requested tone. "
     "Customer PII is masked as [EMAIL]/[PHONE]/[CARD]; never ask for it back. "
     "Respond ONLY with JSON matching the schema."
+)
+
+SUGGEST_SYSTEM = (
+    "Suggest the best support category and priority for this ticket. "
+    "Return JSON only with category, priority, confidence, rationale."
 )
 
 
 class TriageFailed(Exception):
     pass
+
+
+async def suggest_ticket(req: SuggestRequest, provider: LLMProvider) -> SuggestResponse:
+    clean, pii = redact(req.text)
+    schema = {
+        "type": "object",
+        "properties": {
+            "category": {"type": "string"},
+            "priority": {"type": "string"},
+            "confidence": {"type": "number"},
+            "rationale": {"type": "string"},
+        },
+        "required": ["category", "priority", "confidence", "rationale"],
+    }
+    try:
+        res = await provider.generate_json(SUGGEST_SYSTEM, clean, schema)
+        parsed = LLMTriage.model_validate_json(res.text)
+    except (ProviderError, ValidationError) as e:
+        raise TriageFailed(str(e)) from e
+    return SuggestResponse(
+        category=parsed.category,
+        priority=parsed.priority,
+        confidence=parsed.confidence,
+        rationale=parsed.rationale,
+        pii_redacted=pii,
+    )
 
 
 async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
@@ -36,7 +79,8 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
         meta_parts.append(f"channel={req.channel.value}")
     if req.product_area:
         meta_parts.append(f"product_area={req.product_area}")
-    meta = f"({', '.join(meta_parts)})\n" if meta_parts else ""
+    meta_parts.append(f"reply_tone={req.reply_tone.value}")
+    meta = f"({', '.join(meta_parts)})\n"
     schema = LLMTriage.model_json_schema()
     prompt_tok = comp_tok = 0
     parsed: LLMTriage | None = None
@@ -59,7 +103,6 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
     if parsed is None:
         raise TriageFailed("model output failed schema validation after retry")
 
-    # Analyst selections win (human-in-the-loop intake)
     category = req.category or parsed.category
     priority = req.priority or parsed.priority
     queue_key = category.value
@@ -70,7 +113,7 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
     )
     sla = SLA_HOURS.get(priority.value, parsed.sla_hours)
     severity = SEVERITY.get(priority.value, parsed.severity_score)
-
+    now = datetime.now(UTC)
     flags = [f for f in parsed.risk_flags if f.value != "none"] or parsed.risk_flags
 
     return TriageV2(
@@ -87,6 +130,7 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
         latency_ms=int((time.perf_counter() - start) * 1000),
         assigned_queue=assigned,
         sla_hours=sla,
+        sla_due_at=now + timedelta(hours=sla),
         escalation_required=parsed.escalation_required,
         escalation_reason=parsed.escalation_reason,
         severity_score=severity,
@@ -97,4 +141,7 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
         channel=req.channel or Channel.unknown,
         customer_tier=req.customer_tier,
         product_area=req.product_area,
+        reply_tone=req.reply_tone or ReplyTone.empathetic,
+        rationale=parsed.rationale,
+        internal_note=parsed.internal_note,
     )

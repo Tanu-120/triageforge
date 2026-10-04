@@ -44,6 +44,8 @@ def test_v2_happy_path_and_pii(client):
     assert d["category"] == "billing" and d["priority"] == "urgent"
     assert d["assigned_queue"] == "billing_ops"
     assert d["sla_hours"] >= 1
+    assert d["sla_due_at"]
+    assert d["rationale"] and d["internal_note"]
     assert 1 <= d["severity_score"] <= 10
     assert d["next_actions"] and d["keywords"]
     assert d["pii_redacted"] == {"email": 1}
@@ -63,6 +65,7 @@ def test_taxonomy_public(client):
     body = r.json()
     assert "billing" in body["categories"] and "security" in body["categories"]
     assert "billing_ops" in body["queues"]
+    assert "empathetic" in body["reply_tones"]
 
 
 def test_security_and_shipping_categories(client):
@@ -131,3 +134,37 @@ def test_health(client):
 def test_console_served(client):
     r = client.get("/")
     assert r.status_code == 200 and "TriageForge" in r.text
+
+
+def test_suggest_and_feedback(client):
+    h = auth(client, "ivy")
+    s = client.post(
+        "/v2/suggest",
+        json={"text": "Please refund my last invoice, charged twice by mistake"},
+        headers=h,
+    )
+    assert s.status_code == 200
+    body = s.json()
+    assert body["category"] in {"billing", "refund"}
+    assert body["priority"] in {"low", "medium", "high", "urgent"}
+    assert body["rationale"]
+
+    triaged = client.post(
+        "/v2/triage",
+        json={
+            "text": TICKET["text"],
+            "reply_tone": "brief",
+            "category": "billing",
+            "priority": "high",
+        },
+        headers=h,
+    ).json()
+    assert triaged["reply_tone"] == "brief"
+    assert "Got it" in triaged["suggested_reply"] or len(triaged["suggested_reply"]) > 10
+
+    fb = client.post(
+        "/v1/feedback",
+        json={"ticket_id": triaged["ticket_id"], "helpful": True, "note": "solid routing"},
+        headers=h,
+    )
+    assert fb.status_code == 200 and fb.json()["stored"] is True

@@ -2,21 +2,34 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..deps import LimiterDep, MeterDep, ProviderDep, SettingsDep, UserDep, current_user
+from ..deps import (
+    FeedbackDep,
+    LimiterDep,
+    MeterDep,
+    ProviderDep,
+    SettingsDep,
+    UserDep,
+    current_user,
+)
 from ..schemas import (
     Category,
     Channel,
+    FeedbackRequest,
+    FeedbackResponse,
     Priority,
     Queue,
+    ReplyTone,
     RiskFlag,
     Sentiment,
+    SuggestRequest,
+    SuggestResponse,
     TaxonomyResponse,
     TriageRequest,
     TriageV1,
     TriageV2,
     UsageReport,
 )
-from ..service import TriageFailed, triage_ticket
+from ..service import TriageFailed, suggest_ticket, triage_ticket
 
 router = APIRouter(tags=["triage"])
 
@@ -31,6 +44,7 @@ def taxonomy() -> TaxonomyResponse:
         channels=[c.value for c in Channel],
         risk_flags=[r.value for r in RiskFlag],
         sentiments=[s.value for s in Sentiment],
+        reply_tones=[t.value for t in ReplyTone],
     )
 
 
@@ -56,8 +70,33 @@ async def triage_v1(
 async def triage_v2(
     req: TriageRequest, provider: ProviderDep, meter: MeterDep, user: UserDep
 ) -> TriageV2:
-    """v2 ops triage: queue, SLA, severity, risks, next actions, PII, latency."""
+    """v2 ops triage: queue, SLA due, severity, risks, notes, tone-aware reply."""
     return await _run(req, provider, meter, user)
+
+
+@router.post("/v2/suggest", response_model=SuggestResponse)
+async def suggest(
+    req: SuggestRequest, provider: ProviderDep, meter: MeterDep, user: UserDep
+) -> SuggestResponse:
+    """Auto-suggest category + priority (fills the intake form)."""
+    try:
+        result = await suggest_ticket(req, provider)
+    except TriageFailed as e:
+        raise HTTPException(502, f"Upstream model failure: {e}") from e
+    # Rough token accounting for suggest calls
+    meter.add(user, 40)
+    return result
+
+
+@router.post("/v1/feedback", response_model=FeedbackResponse)
+def feedback(
+    body: FeedbackRequest,
+    user: Annotated[str, Depends(current_user)],
+    store: FeedbackDep,
+) -> FeedbackResponse:
+    """Analyst feedback on triage quality (does not consume rate limit)."""
+    store.add(user, body.ticket_id, body.helpful, body.note)
+    return FeedbackResponse(ticket_id=body.ticket_id, helpful=body.helpful)
 
 
 @router.get("/v1/usage/me", response_model=UsageReport)

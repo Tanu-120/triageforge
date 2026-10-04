@@ -7,10 +7,25 @@ from .base import ProviderResult
 
 _CAT_HINT = re.compile(r"\bcategory=([a-z_]+)\b")
 _PRI_HINT = re.compile(r"\bpriority=(low|medium|high|urgent)\b")
+_TONE_HINT = re.compile(r"\breply_tone=(empathetic|formal|brief)\b")
 
 
 def _has_word(text: str, word: str) -> bool:
     return re.search(rf"\b{re.escape(word)}\b", text) is not None
+
+
+_REPLIES = {
+    "empathetic": (
+        "I'm sorry you've had this experience — thank you for telling us. "
+        "I've logged your request and routed it to the right team. "
+        "We'll update you within the stated SLA."
+    ),
+    "formal": (
+        "Thank you for contacting support. Your request has been classified "
+        "and assigned to the appropriate queue. We will respond within the SLA window."
+    ),
+    "brief": ("Got it — ticket logged and routed. We'll update you within SLA."),
+}
 
 
 class MockProvider:
@@ -24,6 +39,8 @@ class MockProvider:
         t = user.lower()
         hint_cat = _CAT_HINT.search(t)
         hint_pri = _PRI_HINT.search(t)
+        tone_m = _TONE_HINT.search(t)
+        tone = tone_m.group(1) if tone_m else "empathetic"
 
         cat = hint_cat.group(1) if hint_cat and hint_cat.group(1) in QUEUE_BY_CATEGORY else "other"
         if cat == "other":
@@ -54,9 +71,7 @@ class MockProvider:
                     cat = c
                     break
 
-        # Word-boundary checks — avoids matching "urgent" inside "not urgent"
         urgent = any(_has_word(t, w) for w in ("asap", "urgent", "outage", "breach", "hack"))
-        # Explicit negation
         if "not urgent" in t or "no rush" in t:
             urgent = False
         neg = any(
@@ -126,22 +141,28 @@ class MockProvider:
         }
         actions = actions_map.get(cat, actions_map["other"])
 
-        # Summary from ticket body only (strip meta prefix)
         body = user.split("\n", 1)[-1] if "\n" in user else user
         if body.startswith("(") and ")" in body[:80]:
             body = body.split(")", 1)[-1].strip()
         snippet = " ".join(body.split())[:120]
+
+        rationale = (
+            f"Matched signals for '{cat.replace('_', ' ')}' with priority '{priority}' "
+            f"(sentiment={sentiment}, escalate={escalate})."
+        )
+        internal = (
+            f"Route to {QUEUE_BY_CATEGORY[cat].replace('_', ' ')}. "
+            f"SLA {SLA_HOURS[priority]}h. Flags: {', '.join(flags)}."
+        )
 
         out = {
             "category": cat,
             "priority": priority,
             "sentiment": sentiment,
             "summary": snippet,
-            "suggested_reply": (
-                "Thanks for reaching out — I've logged your request "
-                "and routed it to the right team. "
-                "We'll update you within the stated SLA."
-            ),
+            "suggested_reply": _REPLIES.get(tone, _REPLIES["empathetic"]),
+            "internal_note": internal,
+            "rationale": rationale,
             "confidence": 0.9 if hint_cat or hint_pri else (0.86 if cat != "other" else 0.62),
             "assigned_queue": QUEUE_BY_CATEGORY[cat],
             "sla_hours": SLA_HOURS[priority],
@@ -153,8 +174,9 @@ class MockProvider:
             "next_actions": actions[:3],
             "language": "en",
         }
+        # Suggest endpoint asks for a smaller schema — still fine (extra ignored upstream)
         text = json.dumps(out)
-        return ProviderResult(text, "mock-ops-v2", len(user) // 4, len(text) // 4)
+        return ProviderResult(text, "mock-ops-v3", len(user) // 4, len(text) // 4)
 
     async def ping(self) -> bool:
         return True

@@ -6,9 +6,11 @@ Base URL `http://localhost:8000` · OpenAPI at `/docs` and `/openapi.json`.
 |---|---|---|---|
 | POST | `/v1/auth/register` | – | Create user (201 / 409) |
 | POST | `/v1/auth/token` | – | Form login → JWT |
-| GET | `/v1/taxonomy` | – | Public category/queue/risk map |
+| GET | `/v1/taxonomy` | – | Public category/queue/risk/tone map |
 | POST | `/v1/triage` | JWT | **Deprecated** classic classification |
+| POST | `/v2/suggest` | JWT | Auto-suggest category + priority |
 | POST | `/v2/triage` | JWT | Full ops triage pack |
+| POST | `/v1/feedback` | JWT | Analyst helpful / needs-work vote |
 | GET | `/v1/usage/me` | JWT | Rate-limit & token usage |
 | GET | `/healthz` `/readyz` | – | Liveness / model readiness |
 

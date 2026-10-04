@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -60,6 +61,12 @@ class RiskFlag(StrEnum):
     none = "none"
 
 
+class ReplyTone(StrEnum):
+    empathetic = "empathetic"
+    formal = "formal"
+    brief = "brief"
+
+
 # ---------- auth ----------
 class RegisterRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -76,13 +83,15 @@ class TokenResponse(BaseModel):
 # ---------- triage ----------
 class TriageRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    # Analyst-guided intake (UI collects these first)
     category: Category | None = Field(default=None, description="Analyst-selected category")
     priority: Priority | None = Field(default=None, description="Analyst-selected priority")
     text: str = Field(min_length=10, max_length=4000, description="Raw customer ticket")
     customer_tier: str | None = Field(default=None, pattern=r"^(free|pro|enterprise)$")
     channel: Channel | None = Field(default=None, description="How the ticket arrived")
     product_area: str | None = Field(default=None, max_length=64, pattern=r"^[a-zA-Z0-9 _-]{2,64}$")
+    reply_tone: ReplyTone = Field(
+        default=ReplyTone.empathetic, description="Tone for customer reply"
+    )
 
     @field_validator("text")
     @classmethod
@@ -90,6 +99,39 @@ class TriageRequest(BaseModel):
         if not any(c.isalpha() for c in v):
             raise ValueError("ticket must contain text")
         return v
+
+
+class SuggestRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    text: str = Field(min_length=10, max_length=4000)
+
+    @field_validator("text")
+    @classmethod
+    def not_blank(cls, v: str) -> str:
+        if not any(c.isalpha() for c in v):
+            raise ValueError("ticket must contain text")
+        return v
+
+
+class SuggestResponse(BaseModel):
+    category: Category
+    priority: Priority
+    confidence: float = Field(ge=0, le=1)
+    rationale: str
+    pii_redacted: dict[str, int]
+
+
+class FeedbackRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    ticket_id: str = Field(min_length=8, max_length=40, pattern=r"^tkt_[a-f0-9]+$")
+    helpful: bool
+    note: str | None = Field(default=None, max_length=300)
+
+
+class FeedbackResponse(BaseModel):
+    ticket_id: str
+    helpful: bool
+    stored: bool = True
 
 
 class LLMTriage(BaseModel):
@@ -101,6 +143,8 @@ class LLMTriage(BaseModel):
     sentiment: Sentiment
     summary: str = Field(max_length=280)
     suggested_reply: str = Field(max_length=1200)
+    internal_note: str = Field(max_length=500)
+    rationale: str = Field(max_length=280)
     confidence: float = Field(ge=0, le=1)
     assigned_queue: Queue
     sla_hours: int = Field(ge=1, le=168)
@@ -133,9 +177,9 @@ class TriageV2(TriageV1):
     confidence: float
     pii_redacted: dict[str, int]
     latency_ms: int
-    # Ops enrichment (differentiators)
     assigned_queue: Queue
     sla_hours: int
+    sla_due_at: datetime
     escalation_required: bool
     escalation_reason: str
     severity_score: int
@@ -146,6 +190,9 @@ class TriageV2(TriageV1):
     channel: Channel
     customer_tier: str | None = None
     product_area: str | None = None
+    reply_tone: ReplyTone = ReplyTone.empathetic
+    rationale: str
+    internal_note: str
 
 
 class UsageReport(BaseModel):
@@ -165,3 +212,4 @@ class TaxonomyResponse(BaseModel):
     channels: list[str]
     risk_flags: list[str]
     sentiments: list[str]
+    reply_tones: list[str]

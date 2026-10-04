@@ -63,3 +63,24 @@ class UsageMeter:
 
     def add(self, user: str, tokens: int) -> None:
         self._used[(user, self._day())] += tokens
+
+
+class FeedbackStore:
+    """In-memory analyst feedback on triage quality (demo / assignment)."""
+
+    def __init__(self) -> None:
+        self._items: list[dict[str, object]] = []
+
+    def add(self, username: str, ticket_id: str, helpful: bool, note: str | None) -> None:
+        self._items.append(
+            {
+                "username": username,
+                "ticket_id": ticket_id,
+                "helpful": helpful,
+                "note": note,
+                "at": datetime.now(UTC).isoformat(),
+            }
+        )
+
+    def count(self) -> int:
+        return len(self._items)
