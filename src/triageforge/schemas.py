@@ -4,10 +4,19 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Category(StrEnum):
+    """Expanded support taxonomy — richer than a 4-bucket classifier."""
+
     billing = "billing"
+    refund = "refund"
     bug = "bug"
+    outage = "outage"
     feature_request = "feature_request"
     account = "account"
+    security = "security"
+    shipping = "shipping"
+    onboarding = "onboarding"
+    cancellation = "cancellation"
+    compliance = "compliance"
     other = "other"
 
 
@@ -22,6 +31,33 @@ class Sentiment(StrEnum):
     negative = "negative"
     neutral = "neutral"
     positive = "positive"
+
+
+class Queue(StrEnum):
+    billing_ops = "billing_ops"
+    engineering = "engineering"
+    trust_safety = "trust_safety"
+    logistics = "logistics"
+    success = "success"
+    retention = "retention"
+    general_support = "general_support"
+
+
+class Channel(StrEnum):
+    email = "email"
+    chat = "chat"
+    phone = "phone"
+    social = "social"
+    unknown = "unknown"
+
+
+class RiskFlag(StrEnum):
+    churn = "churn"
+    fraud = "fraud"
+    legal = "legal"
+    data_exposure = "data_exposure"
+    payment_dispute = "payment_dispute"
+    none = "none"
 
 
 # ---------- auth ----------
@@ -42,6 +78,8 @@ class TriageRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     text: str = Field(min_length=10, max_length=4000, description="Raw customer ticket")
     customer_tier: str | None = Field(default=None, pattern=r"^(free|pro|enterprise)$")
+    channel: Channel | None = Field(default=None, description="How the ticket arrived")
+    product_area: str | None = Field(default=None, max_length=64, pattern=r"^[a-zA-Z0-9 _-]{2,64}$")
 
     @field_validator("text")
     @classmethod
@@ -61,6 +99,15 @@ class LLMTriage(BaseModel):
     summary: str = Field(max_length=280)
     suggested_reply: str = Field(max_length=1200)
     confidence: float = Field(ge=0, le=1)
+    assigned_queue: Queue
+    sla_hours: int = Field(ge=1, le=168)
+    escalation_required: bool
+    escalation_reason: str = Field(max_length=200)
+    severity_score: int = Field(ge=1, le=10)
+    risk_flags: list[RiskFlag] = Field(max_length=4)
+    keywords: list[str] = Field(max_length=8)
+    next_actions: list[str] = Field(min_length=1, max_length=5)
+    language: str = Field(default="en", min_length=2, max_length=8)
 
 
 class Usage(BaseModel):
@@ -83,6 +130,19 @@ class TriageV2(TriageV1):
     confidence: float
     pii_redacted: dict[str, int]
     latency_ms: int
+    # Ops enrichment (differentiators)
+    assigned_queue: Queue
+    sla_hours: int
+    escalation_required: bool
+    escalation_reason: str
+    severity_score: int
+    risk_flags: list[RiskFlag]
+    keywords: list[str]
+    next_actions: list[str]
+    language: str
+    channel: Channel
+    customer_tier: str | None = None
+    product_area: str | None = None
 
 
 class UsageReport(BaseModel):
@@ -91,3 +151,14 @@ class UsageReport(BaseModel):
     daily_quota: int
     requests_last_minute: int
     rate_limit_per_min: int
+
+
+class TaxonomyResponse(BaseModel):
+    """Public contract map — useful for UI + demos of schema-driven design."""
+
+    categories: list[str]
+    priorities: list[str]
+    queues: list[str]
+    channels: list[str]
+    risk_flags: list[str]
+    sentiments: list[str]

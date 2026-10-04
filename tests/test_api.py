@@ -42,6 +42,10 @@ def test_v2_happy_path_and_pii(client):
     assert r.status_code == 200
     d = r.json()
     assert d["category"] == "billing" and d["priority"] == "urgent"
+    assert d["assigned_queue"] == "billing_ops"
+    assert d["sla_hours"] >= 1
+    assert 1 <= d["severity_score"] <= 10
+    assert d["next_actions"] and d["keywords"]
     assert d["pii_redacted"] == {"email": 1}
     assert 0 <= d["confidence"] <= 1
 
@@ -50,6 +54,37 @@ def test_v1_is_subset(client):
     r = client.post("/v1/triage", json=TICKET, headers=auth(client, "dave"))
     assert r.status_code == 200
     assert "suggested_reply" not in r.json()
+    assert "assigned_queue" not in r.json()
+
+
+def test_taxonomy_public(client):
+    r = client.get("/v1/taxonomy")
+    assert r.status_code == 200
+    body = r.json()
+    assert "billing" in body["categories"] and "security" in body["categories"]
+    assert "billing_ops" in body["queues"]
+
+
+def test_security_and_shipping_categories(client):
+    h = auth(client, "gina")
+    sec = client.post(
+        "/v2/triage",
+        json={
+            "text": "Unauthorized login attempt looks like a breach on my account",
+            "channel": "email",
+        },
+        headers=h,
+    ).json()
+    assert sec["category"] == "security" and sec["assigned_queue"] == "trust_safety"
+    ship = client.post(
+        "/v2/triage",
+        json={
+            "text": "Shipping delivery tracking stuck, need replacement ASAP",
+            "channel": "chat",
+        },
+        headers=h,
+    ).json()
+    assert ship["category"] == "shipping" and ship["assigned_queue"] == "logistics"
 
 
 def test_validation_rejects_bad_input(client):

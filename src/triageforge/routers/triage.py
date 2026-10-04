@@ -3,10 +3,35 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from ..deps import LimiterDep, MeterDep, ProviderDep, SettingsDep, UserDep, current_user
-from ..schemas import TriageRequest, TriageV1, TriageV2, UsageReport
+from ..schemas import (
+    Category,
+    Channel,
+    Priority,
+    Queue,
+    RiskFlag,
+    Sentiment,
+    TaxonomyResponse,
+    TriageRequest,
+    TriageV1,
+    TriageV2,
+    UsageReport,
+)
 from ..service import TriageFailed, triage_ticket
 
 router = APIRouter(tags=["triage"])
+
+
+@router.get("/v1/taxonomy", response_model=TaxonomyResponse)
+def taxonomy() -> TaxonomyResponse:
+    """Public map of enums — shows schema-driven design without auth."""
+    return TaxonomyResponse(
+        categories=[c.value for c in Category],
+        priorities=[p.value for p in Priority],
+        queues=[q.value for q in Queue],
+        channels=[c.value for c in Channel],
+        risk_flags=[r.value for r in RiskFlag],
+        sentiments=[s.value for s in Sentiment],
+    )
 
 
 async def _run(req: TriageRequest, provider: ProviderDep, meter: MeterDep, user: str) -> TriageV2:
@@ -31,7 +56,7 @@ async def triage_v1(
 async def triage_v2(
     req: TriageRequest, provider: ProviderDep, meter: MeterDep, user: UserDep
 ) -> TriageV2:
-    """v2: adds sentiment, suggested reply, confidence, PII report, latency."""
+    """v2 ops triage: queue, SLA, severity, risks, next actions, PII, latency."""
     return await _run(req, provider, meter, user)
 
 

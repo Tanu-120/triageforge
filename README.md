@@ -1,8 +1,8 @@
 # TriageForge 🔥
 
-> JWT-secured support-ticket triage microservice powered by a **local open LLM** (Ollama · Qwen2.5) — with PII redaction, schema-enforced model output, per-user rate limits, token quotas and versioned API contracts.
+> JWT-secured **support-operations** microservice powered by a **local open LLM** (Ollama · Qwen2.5) — with a 12-category taxonomy, queue routing, SLA, severity, risk flags, next actions, PII redaction, schema-enforced model output, rate limits, and versioned API contracts.
 
-Customer tickets go in; a validated JSON triage (category, priority, sentiment, summary, draft reply, confidence) comes out. PII is stripped **before** the model sees anything.
+Customer tickets go in; a validated **ops pack** comes out (not just labels): category + queue + SLA hours + severity score + escalation + risks + agent next actions + draft reply. PII is stripped **before** the model sees anything.
 
 ## Why it's production-minded
 | Concern | Implementation |

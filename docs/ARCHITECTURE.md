@@ -18,11 +18,15 @@ flowchart LR
 ## Request lifecycle
 1. **Auth** – `OAuth2PasswordBearer` extracts the token; `decode_token` enforces signature, algorithm allow-list and required `exp`/`sub`; the user must still exist.
 2. **Controls** – sliding-window limiter (default 10/min) then daily token quota. Both fail with `429` + `Retry-After`.
-3. **Validation** – `TriageRequest` (`extra="forbid"`, 10–4000 chars, tier regex) → `422` on violation.
+3. **Validation** – `TriageRequest` (`extra="forbid"`, text bounds, optional tier/channel/product) → `422` on violation.
 4. **Redaction** – emails, phones, card numbers replaced with `[EMAIL]` etc. before inference.
-5. **Inference** – provider called with the JSON schema of `LLMTriage` (Ollama constrains decoding to it).
+5. **Inference** – provider called with the JSON schema of `LLMTriage` (queue, SLA, severity, risks, actions…).
 6. **Contract check** – output re-validated with Pydantic; one repair retry, then `502`.
-7. **Metering** – prompt+completion tokens added to the user's daily usage.
+7. **Ops enrichment** – server attaches ticket id, latency, channel/tier echo, PII counts.
+8. **Metering** – prompt+completion tokens added to the user's daily usage.
+
+## Why this is more than a basic classifier
+Many demos stop at `category` + `priority`. TriageForge returns an **operations pack**: 12-category taxonomy, assigned queue, SLA hours, severity 1–10, escalation decision, risk flags, keywords, and concrete next actions — plus a public `/v1/taxonomy` map for schema transparency.
 
 ## Service boundaries & decisions
 | Decision | Rationale |
