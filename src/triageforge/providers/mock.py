@@ -29,11 +29,13 @@ class MockProvider:
                 break
         urgent = any(w in t for w in ("asap", "urgent", "down", "outage"))
         neg = any(w in t for w in ("angry", "terrible", "unacceptable", "crash", "charged twice"))
+        # One-line summary only (no control chars) — mirrors real model JSON hygiene.
+        snippet = " ".join(user.split())[:120]
         out = {
             "category": cat,
             "priority": "urgent" if urgent else ("high" if neg else "medium"),
             "sentiment": "negative" if neg else "neutral",
-            "summary": user[:120],
+            "summary": snippet,
             "suggested_reply": "Thanks for reaching out - we're looking into this right away.",
             "confidence": 0.8,
         }
