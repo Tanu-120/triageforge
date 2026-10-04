@@ -1,0 +1,43 @@
+[project]
+name = "triageforge"
+version = "0.1.0"
+description = "Support-ticket triage microservice: JWT-protected FastAPI over a local open LLM (Ollama) with Pydantic v2 contracts"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+  "httpx>=0.27",
+  "pyjwt>=2.9",
+  "bcrypt>=4.2",
+  "python-multipart>=0.0.9",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6", "mypy>=1.11"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/triageforge"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/triageforge/static" = "triageforge/static"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "auto"

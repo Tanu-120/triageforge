@@ -1,0 +1,12 @@
+# Offline / CI-friendly stack — no Ollama download required.
+# Usage: docker compose -f docker-compose.mock.yml up --build
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      JWT_SECRET: triageforge-dev-secret-change-me-32chars
+      PROVIDER: mock
+      RATE_LIMIT_PER_MIN: "10"
+      DAILY_TOKEN_QUOTA: "50000"
+    restart: unless-stopped
