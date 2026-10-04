@@ -87,6 +87,24 @@ def test_security_and_shipping_categories(client):
     assert ship["category"] == "shipping" and ship["assigned_queue"] == "logistics"
 
 
+def test_analyst_category_priority_and_not_urgent(client):
+    h = auth(client, "helen")
+    feature = client.post(
+        "/v2/triage",
+        json={
+            "category": "feature_request",
+            "priority": "low",
+            "text": "It would be great to export CSV. Not urgent, just a suggestion.",
+        },
+        headers=h,
+    ).json()
+    assert feature["category"] == "feature_request"
+    assert feature["priority"] == "low"
+    assert feature["severity_score"] == 2
+    assert feature["assigned_queue"] == "success"
+    assert feature["suggested_reply"]
+
+
 def test_validation_rejects_bad_input(client):
     h = auth(client, "erin")
     assert client.post("/v2/triage", json={"text": "short"}, headers=h).status_code == 422

@@ -21,13 +21,15 @@ Base URL `http://localhost:8000` · OpenAPI at `/docs` and `/openapi.json`.
 ## Request: `TriageRequest`
 ```json
 {
+  "category": "billing|refund|bug|… (optional analyst selection)",
+  "priority": "low|medium|high|urgent (optional analyst selection)",
   "text": "string 10-4000 chars",
   "customer_tier": "free|pro|enterprise",
   "channel": "email|chat|phone|social",
   "product_area": "optional product name"
 }
 ```
-Unknown fields are rejected (`422`).
+When `category` / `priority` are provided, they override model guesses (human-in-the-loop intake). Unknown fields are rejected (`422`).
 
 ## Response: `TriageV2` (ops pack)
 ```json

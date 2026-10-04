@@ -1,25 +1,16 @@
 import json
+import re
 from typing import Any
 
+from ..routing import QUEUE_BY_CATEGORY, SEVERITY, SLA_HOURS
 from .base import ProviderResult
 
-# category -> default queue
-_QUEUE = {
-    "billing": "billing_ops",
-    "refund": "billing_ops",
-    "bug": "engineering",
-    "outage": "engineering",
-    "feature_request": "success",
-    "account": "general_support",
-    "security": "trust_safety",
-    "shipping": "logistics",
-    "onboarding": "success",
-    "cancellation": "retention",
-    "compliance": "trust_safety",
-    "other": "general_support",
-}
+_CAT_HINT = re.compile(r"\bcategory=([a-z_]+)\b")
+_PRI_HINT = re.compile(r"\bpriority=(low|medium|high|urgent)\b")
 
-_SLA = {"urgent": 2, "high": 8, "medium": 24, "low": 72}
+
+def _has_word(text: str, word: str) -> bool:
+    return re.search(rf"\b{re.escape(word)}\b", text) is not None
 
 
 class MockProvider:
@@ -31,47 +22,56 @@ class MockProvider:
         self, system: str, user: str, json_schema: dict[str, Any]
     ) -> ProviderResult:
         t = user.lower()
-        cat = "other"
-        for kw, c in [
-            ("refund", "refund"),
-            ("chargeback", "refund"),
-            ("charged twice", "billing"),
-            ("invoice", "billing"),
-            ("charge", "billing"),
-            ("outage", "outage"),
-            ("down", "outage"),
-            ("crash", "bug"),
-            ("error", "bug"),
-            ("hack", "security"),
-            ("breach", "security"),
-            ("unauthorized", "security"),
-            ("ship", "shipping"),
-            ("delivery", "shipping"),
-            ("tracking", "shipping"),
-            ("cancel", "cancellation"),
-            ("unsubscribe", "cancellation"),
-            ("onboard", "onboarding"),
-            ("getting started", "onboarding"),
-            ("gdpr", "compliance"),
-            ("privacy", "compliance"),
-            ("password", "account"),
-            ("login", "account"),
-            ("would be great", "feature_request"),
-            ("feature", "feature_request"),
-        ]:
-            if kw in t:
-                cat = c
-                break
+        hint_cat = _CAT_HINT.search(t)
+        hint_pri = _PRI_HINT.search(t)
 
-        urgent = any(w in t for w in ("asap", "urgent", "down", "outage", "breach", "hack"))
+        cat = hint_cat.group(1) if hint_cat and hint_cat.group(1) in QUEUE_BY_CATEGORY else "other"
+        if cat == "other":
+            for kw, c in [
+                ("refund", "refund"),
+                ("chargeback", "refund"),
+                ("charged twice", "billing"),
+                ("invoice", "billing"),
+                ("charge", "billing"),
+                ("outage", "outage"),
+                ("crash", "bug"),
+                ("error", "bug"),
+                ("hack", "security"),
+                ("breach", "security"),
+                ("unauthorized", "security"),
+                ("delivery", "shipping"),
+                ("tracking", "shipping"),
+                ("shipping", "shipping"),
+                ("cancel", "cancellation"),
+                ("onboard", "onboarding"),
+                ("gdpr", "compliance"),
+                ("password", "account"),
+                ("login", "account"),
+                ("would be great", "feature_request"),
+                ("feature", "feature_request"),
+            ]:
+                if kw in t:
+                    cat = c
+                    break
+
+        # Word-boundary checks — avoids matching "urgent" inside "not urgent"
+        urgent = any(_has_word(t, w) for w in ("asap", "urgent", "outage", "breach", "hack"))
+        # Explicit negation
+        if "not urgent" in t or "no rush" in t:
+            urgent = False
         neg = any(
-            w in t
-            for w in ("angry", "terrible", "unacceptable", "crash", "charged twice", "lawsuit")
+            phrase in t
+            for phrase in ("angry", "terrible", "unacceptable", "crash", "charged twice", "lawsuit")
         )
-        priority = "urgent" if urgent else ("high" if neg else "medium")
+
+        if hint_pri:
+            priority = hint_pri.group(1)
+        else:
+            priority = "urgent" if urgent else ("high" if neg else "medium")
+
         if neg:
             sentiment = "negative"
-        elif "love" in t or "great" in t:
+        elif "love" in t or "great" in t or cat == "feature_request":
             sentiment = "positive"
         else:
             sentiment = "neutral"
@@ -91,14 +91,12 @@ class MockProvider:
             flags = ["none"]
         flags = flags[:4]
 
-        severity = {"urgent": 9, "high": 7, "medium": 5, "low": 2}[priority]
+        severity = SEVERITY[priority]
         if "enterprise" in t:
             severity = min(10, severity + 1)
 
-        kw_pool = ("refund", "crash", "login", "shipping", "outage", "security", "invoice")
-        keywords = [w for w in kw_pool if w in t][:6]
-        if not keywords:
-            keywords = [cat.replace("_", " ")]
+        kw_pool = ("refund", "crash", "login", "shipping", "outage", "security", "invoice", "csv")
+        keywords = [w for w in kw_pool if w in t][:6] or [cat.replace("_", " ")]
 
         escalate = priority in ("urgent", "high") and (
             cat in ("security", "outage", "refund") or "enterprise" in t or "churn" in flags
@@ -109,56 +107,44 @@ class MockProvider:
             else "Standard handling path — no escalation required"
         )
 
-        actions = {
+        actions_map = {
             "billing": [
                 "Verify duplicate charges in ledger",
                 "Issue provisional credit if confirmed",
             ],
-            "refund": [
-                "Confirm eligibility window",
-                "Process refund and notify customer",
-            ],
+            "refund": ["Confirm eligibility window", "Process refund and notify customer"],
             "bug": ["Reproduce on latest build", "File engineering ticket with logs"],
             "outage": ["Check status page & on-call", "Send incident acknowledgement"],
             "security": ["Force session revoke", "Escalate to Trust & Safety"],
-            "shipping": [
-                "Pull carrier tracking",
-                "Offer replacement if delayed > SLA",
-            ],
-            "cancellation": [
-                "Offer retention save",
-                "Process cancel if customer insists",
-            ],
+            "shipping": ["Pull carrier tracking", "Offer replacement if delayed > SLA"],
+            "cancellation": ["Offer retention save", "Process cancel if customer insists"],
             "account": ["Verify identity", "Reset credentials securely"],
-            "feature_request": [
-                "Log in product board",
-                "Send polite acknowledgement",
-            ],
-            "onboarding": [
-                "Share quick-start checklist",
-                "Schedule success check-in",
-            ],
-            "compliance": [
-                "Open privacy request workflow",
-                "Confirm legal hold status",
-            ],
+            "feature_request": ["Log in product board", "Send polite acknowledgement"],
+            "onboarding": ["Share quick-start checklist", "Schedule success check-in"],
+            "compliance": ["Open privacy request workflow", "Confirm legal hold status"],
             "other": ["Clarify request", "Route to general support"],
-        }.get(cat, ["Clarify request", "Route to general support"])
+        }
+        actions = actions_map.get(cat, actions_map["other"])
 
-        snippet = " ".join(user.split())[:120]
+        # Summary from ticket body only (strip meta prefix)
+        body = user.split("\n", 1)[-1] if "\n" in user else user
+        if body.startswith("(") and ")" in body[:80]:
+            body = body.split(")", 1)[-1].strip()
+        snippet = " ".join(body.split())[:120]
+
         out = {
             "category": cat,
             "priority": priority,
             "sentiment": sentiment,
             "summary": snippet,
             "suggested_reply": (
-                "Thanks for reaching out — I've classified your request "
+                "Thanks for reaching out — I've logged your request "
                 "and routed it to the right team. "
                 "We'll update you within the stated SLA."
             ),
-            "confidence": 0.86 if cat != "other" else 0.62,
-            "assigned_queue": _QUEUE[cat],
-            "sla_hours": _SLA[priority],
+            "confidence": 0.9 if hint_cat or hint_pri else (0.86 if cat != "other" else 0.62),
+            "assigned_queue": QUEUE_BY_CATEGORY[cat],
+            "sla_hours": SLA_HOURS[priority],
             "escalation_required": escalate,
             "escalation_reason": reason,
             "severity_score": severity,

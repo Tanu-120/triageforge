@@ -5,13 +5,14 @@ from pydantic import ValidationError
 
 from .providers import LLMProvider, ProviderError
 from .redaction import redact
-from .schemas import Channel, LLMTriage, TriageRequest, TriageV2, Usage
+from .routing import QUEUE_BY_CATEGORY, SEVERITY, SLA_HOURS
+from .schemas import Channel, LLMTriage, Queue, TriageRequest, TriageV2, Usage
 
 SYSTEM = (
     "You are TriageForge, an enterprise support-operations engine. "
-    "Classify the ticket into the taxonomy, assign an ops queue, set SLA hours, "
-    "score severity (1-10), list risk flags, keywords, and concrete next actions, "
-    "and draft a short polite reply. "
+    "If the analyst already selected category/priority, respect those values. "
+    "Assign an ops queue, set SLA hours, score severity (1-10), list risk flags, "
+    "keywords, concrete next actions, and draft a short polite reply. "
     "Customer PII is masked as [EMAIL]/[PHONE]/[CARD]; never ask for it back. "
     "Respond ONLY with JSON matching the schema."
 )
@@ -25,6 +26,10 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
     start = time.perf_counter()
     clean, pii = redact(req.text)
     meta_parts: list[str] = []
+    if req.category:
+        meta_parts.append(f"category={req.category.value}")
+    if req.priority:
+        meta_parts.append(f"priority={req.priority.value}")
     if req.customer_tier:
         meta_parts.append(f"customer_tier={req.customer_tier}")
     if req.channel:
@@ -38,7 +43,7 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
     user = f"{meta}{clean}"
     res_model = "unknown"
 
-    for _ in range(2):  # one repair retry on contract violation
+    for _ in range(2):
         try:
             res = await provider.generate_json(SYSTEM, user, schema)
         except ProviderError as e:
@@ -54,13 +59,24 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
     if parsed is None:
         raise TriageFailed("model output failed schema validation after retry")
 
-    # Normalize empty/none risk list for cleaner API consumers
+    # Analyst selections win (human-in-the-loop intake)
+    category = req.category or parsed.category
+    priority = req.priority or parsed.priority
+    queue_key = category.value
+    assigned = (
+        Queue(parsed.assigned_queue)
+        if req.category is None
+        else Queue(QUEUE_BY_CATEGORY.get(queue_key, "general_support"))
+    )
+    sla = SLA_HOURS.get(priority.value, parsed.sla_hours)
+    severity = SEVERITY.get(priority.value, parsed.severity_score)
+
     flags = [f for f in parsed.risk_flags if f.value != "none"] or parsed.risk_flags
 
     return TriageV2(
         ticket_id=f"tkt_{uuid.uuid4().hex[:10]}",
-        category=parsed.category,
-        priority=parsed.priority,
+        category=category,
+        priority=priority,
         summary=parsed.summary,
         model=res_model,
         usage=Usage(prompt_tokens=prompt_tok, completion_tokens=comp_tok),
@@ -69,11 +85,11 @@ async def triage_ticket(req: TriageRequest, provider: LLMProvider) -> TriageV2:
         confidence=parsed.confidence,
         pii_redacted=pii,
         latency_ms=int((time.perf_counter() - start) * 1000),
-        assigned_queue=parsed.assigned_queue,
-        sla_hours=parsed.sla_hours,
+        assigned_queue=assigned,
+        sla_hours=sla,
         escalation_required=parsed.escalation_required,
         escalation_reason=parsed.escalation_reason,
-        severity_score=parsed.severity_score,
+        severity_score=severity,
         risk_flags=flags,
         keywords=parsed.keywords,
         next_actions=parsed.next_actions,

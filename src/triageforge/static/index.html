@@ -3,256 +3,274 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TriageForge Ops — Support Intelligence Console</title>
+<title>TriageForge Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,650;9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f3f0e8; --bg2:#e7e2d6; --ink:#1a1f1c; --mute:#5f6b63; --line:#cfc7b8;
-  --panel:#fffdf8; --acc:#0f766e; --acc2:#b45309; --bad:#b91c1c; --ok:#047857;
-  --warn:#c2410c; --info:#1d4ed8; --soft:rgba(15,118,110,.08);
-  --display:"Fraunces",Georgia,serif; --sans:"DM Sans",sans-serif; --mono:"JetBrains Mono",monospace;
-  --shadow:0 16px 40px rgba(40,32,20,.08);
+  --bg:#efebe3; --ink:#18201c; --mute:#617068; --line:#d5cdc0; --panel:#fffcf7;
+  --acc:#0f766e; --acc-soft:#e6f5f3; --bad:#b91c1c; --ok:#047857; --warn:#c2410c; --info:#1d4ed8;
+  --shadow:0 10px 30px rgba(40,32,20,.07);
+  --sans:"DM Sans",system-ui,sans-serif; --display:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;color:var(--ink);font:15px/1.5 var(--sans);
-  background:
-    radial-gradient(900px 420px at 0% 0%, rgba(15,118,110,.12), transparent 55%),
-    radial-gradient(700px 380px at 100% 10%, rgba(180,83,9,.10), transparent 50%),
-    linear-gradient(180deg, var(--bg), var(--bg2));
-}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.45;
-  background-image:radial-gradient(rgba(26,31,28,.08) 0.7px, transparent 0.7px);background-size:18px 18px}
+html,body{margin:0;min-height:100%;font:15px/1.5 var(--sans);color:var(--ink);
+  background:linear-gradient(180deg,#f4f0e8 0%, var(--bg) 40%, #e7e1d5 100%)}
 a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-button,input,textarea,select{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;transition:.15s ease}
-button:hover{border-color:var(--acc);color:var(--acc)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px}
+button:hover{border-color:var(--acc)}
 button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
-button.primary:hover{filter:brightness(1.05);color:#fff}
+button.primary:hover{filter:brightness(1.06)}
 button:disabled{opacity:.55;cursor:wait}
 .hide{display:none!important}
-.shell{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:18px 18px 48px}
-.top{display:flex;gap:14px;align-items:center;margin-bottom:18px;animation:rise .45s ease both}
-.brand{display:flex;gap:12px;align-items:center}
-.mark{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#0f766e,#115e59);color:#ecfdf5;font:700 16px/1 var(--display);box-shadow:var(--shadow)}
-.brand h1{margin:0;font:700 30px/1 var(--display);letter-spacing:-.02em}
-.brand p{margin:2px 0 0;color:var(--mute);font-size:12.5px}
+.shell{max-width:1120px;margin:0 auto;padding:20px 20px 40px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.mark{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--acc);color:#fff;font:700 15px/1 var(--display)}
+.brand h1{margin:0;font:700 26px/1 var(--display)}
+.brand p{margin:2px 0 0;color:var(--mute);font-size:12px}
 .sp{flex:1}
-.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.chip{font:500 11px/1 var(--mono);padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,253,248,.8);color:var(--mute)}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{font:500 11px var(--mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,252,247,.9);color:var(--mute)}
 .chip.ok{background:#ecfdf5;color:var(--ok);border-color:#a7f3d0}
-.chip.bad{background:#fef2f2;color:var(--bad);border-color:#fecaca}
 
-.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;min-height:calc(100vh - 110px);animation:rise .5s ease both}
-@media(max-width:960px){.hero{grid-template-columns:1fr;min-height:auto}}
-.pitch{padding:18px 6px}
-.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
-.pitch h2{margin:10px 0 12px;font:700 clamp(34px,5vw,52px)/1.05 var(--display);letter-spacing:-.03em;max-width:16ch}
-.pitch h2 em{font-style:italic;color:var(--acc)}
-.lede{margin:0 0 18px;color:var(--mute);max-width:48ch;font-size:16px}
-.tax{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
-.tax span{font:500 11px var(--mono);padding:5px 8px;border-radius:8px;background:var(--soft);color:var(--acc);border:1px solid rgba(15,118,110,.15)}
-.diff{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:560px){.diff{grid-template-columns:1fr}}
-.diff div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
-.diff strong{display:block;font-size:13px;margin-bottom:2px}
-.diff span{color:var(--mute);font-size:12px}
-
-.auth{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}
-.auth h3{margin:0 0 6px;font:700 24px/1.15 var(--display)}
-.hint{margin:0 0 16px;color:var(--mute);font-size:13px}
-.field{margin-bottom:12px}
-.field label{display:block;margin-bottom:5px;font-size:12px;color:var(--mute);font-weight:600}
-.field input,.field select,textarea{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;outline:none}
-.field input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+/* Auth */
+.auth-wrap{max-width:420px;margin:48px auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.auth-wrap h2{margin:0 0 6px;font:700 28px/1.15 var(--display)}
+.auth-wrap .sub{margin:0 0 20px;color:var(--mute);font-size:14px}
+.field{margin-bottom:14px}
+.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute);letter-spacing:.02em}
+.field input,.field select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
+.field input:focus,.field select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
 .pw-wrap{position:relative}
-.pw-wrap input{padding-right:72px}
-.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);font-weight:600;font-size:12px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1;min-width:120px}
-.msg{min-height:18px;margin-top:10px;font-size:13px}.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
+.pw-wrap input{padding-right:70px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);font-size:12px;font-weight:700;padding:8px}
+.actions{display:flex;gap:10px;margin-top:4px}
+.actions button{flex:1}
+.msg{min-height:18px;margin-top:12px;font-size:13px}
+.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
 
-.app{animation:rise .4s ease both}
-.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
-@media(max-width:800px){.flow{grid-template-columns:repeat(2,1fr)}}
-.step{padding:10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,253,248,.7);font-size:12px;color:var(--mute)}
-.step b{display:block;color:var(--ink);margin-bottom:2px}
-.step.active{border-color:rgba(15,118,110,.5);background:#ecfdf5;color:var(--ink)}
-.step.done{border-color:#a7f3d0;background:#f0fdf4}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
-.seg button{border:0;border-radius:0;background:transparent;color:var(--mute);font-weight:700;font-size:12px}
-.seg button.active{background:var(--soft);color:var(--acc)}
-.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:14px}
-@media(max-width:960px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
-.panel h3{margin:0 0 12px;font:700 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
-textarea{min-height:140px;resize:vertical}
-.samples{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
-.samples button{font-size:12px;padding:7px 10px;border-radius:999px}
-.shield{margin-top:8px;padding:12px;border-radius:12px;border:1px dashed #d6b656;background:#fffbeb}
-.shield .label{font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin-bottom:8px}
-.tag{background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:6px;font:600 12px var(--mono)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-.bar{height:8px;border-radius:99px;background:#efe8da;border:1px solid var(--line);overflow:hidden;margin:6px 0 12px}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#0ea5a4);transition:width .45s ease}
-.k{font-size:12px;color:var(--mute)}.v{font-weight:700}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.stat{padding:10px;border-radius:12px;background:#f7f3ea;border:1px solid var(--line)}
-.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font:700 11px/1 var(--mono);color:#fff}
+/* App layout */
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 4px;font:700 20px/1.2 var(--display)}
+.card .desc{margin:0 0 18px;color:var(--mute);font-size:13px}
+.stepno{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--acc-soft);color:var(--acc);font:700 11px/1 var(--mono);margin-right:8px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-grid .full{grid-column:1/-1}
+textarea{min-height:130px;resize:vertical;line-height:1.45}
+.samples{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+.samples button{font-size:12px;padding:7px 11px;border-radius:999px;background:#fff}
+.pii{margin-top:14px;padding:12px 14px;border-radius:12px;background:#fffbeb;border:1px solid #f1e0a8}
+.pii .lbl{font:700 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin-bottom:8px}
+.pii .view{font-size:13px;line-height:1.5;word-break:break-word}
+.tag{background:#fde68a;color:#78350f;padding:1px 6px;border-radius:5px;font:600 12px var(--mono)}
+.foot-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+
+/* Results */
+.result-empty{padding:28px 8px;text-align:center;color:var(--mute)}
+.result-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.badge{display:inline-flex;padding:5px 11px;border-radius:999px;font:700 11px/1 var(--mono);color:#fff;text-transform:uppercase}
 .urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:var(--info)}.low{background:var(--ok)}
-.esc{margin:8px 0 12px;padding:10px 12px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-size:13px}
-.esc.safe{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
-.sev{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
-.sevmeter{flex:1;height:10px;border-radius:99px;background:#efe8da;overflow:hidden;border:1px solid var(--line)}
-.sevmeter i{display:block;height:100%;background:linear-gradient(90deg,#047857,#b45309,#b91c1c)}
-.actions-list,.kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.actions-list span,.kw span{font-size:12px;padding:6px 9px;border-radius:9px;background:#f7f3ea;border:1px solid var(--line)}
-.actions-list span{background:#ecfdf5;border-color:#a7f3d0}
-.reply{margin-top:8px;padding:12px;border-radius:12px;background:#f7f3ea;border:1px solid var(--line);white-space:pre-wrap}
-.hist{display:flex;flex-direction:column;gap:7px}
-.hist button{text-align:left;display:flex;gap:8px;align-items:center;width:100%}
-.hist .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:12px;color:var(--mute)}
-.empty{color:var(--mute);font-size:14px}
-.tiny{font-size:12px;color:var(--mute);margin:8px 0 0}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.result-enter{animation:rise .35s ease both}
+.pill{display:inline-flex;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font:500 12px var(--mono);color:var(--mute)}
+.summary{margin:0 0 18px;font-size:15px;line-height:1.55}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric{padding:12px 14px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line)}
+.metric .k{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.metric .v{font-size:15px;font-weight:700}
+.block{margin-bottom:16px}
+.block h4{margin:0 0 8px;font:700 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.sev-row{display:flex;align-items:center;gap:12px}
+.sev-row strong{font-variant-numeric:tabular-nums;min-width:36px}
+.meter{flex:1;height:10px;border-radius:99px;background:#e8e0d2;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#047857,#c2410c,#b91c1c)}
+.banner{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.4;margin-bottom:16px}
+.banner.safe{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.banner.hot{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
+.list li b{color:var(--acc);font:700 12px var(--mono);min-width:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{padding:6px 10px;border-radius:8px;background:#fff;border:1px solid var(--line);font-size:12px}
+.reply-box{padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);line-height:1.55;font-size:14px;white-space:pre-wrap}
+.reply-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.hist button{width:100%;text-align:left;display:flex;gap:10px;align-items:center;padding:10px 12px}
+.hist .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mute)}
+.dev{margin-top:22px;text-align:center;font-size:12px;color:var(--mute)}
+.dev a{margin:0 8px;color:var(--mute)}
+.tiny{font-size:12px;color:var(--mute);margin-top:8px}
 </style>
 </head>
 <body>
 <div class="shell">
   <header class="top">
+    <div class="mark">TF</div>
     <div class="brand">
-      <div class="mark">TF</div>
-      <div>
-        <h1>TriageForge Ops</h1>
-        <p>Support intelligence · JWT · Pydantic v2 · Open LLM</p>
-      </div>
+      <h1>TriageForge Ops</h1>
+      <p>Analyst intake → AI ops pack</p>
     </div>
     <div class="sp"></div>
     <div class="meta">
       <span class="chip" id="prov">model: …</span>
       <span class="chip hide" id="who"></span>
-      <a class="chip" href="/docs" target="_blank" rel="noreferrer">OpenAPI</a>
-      <a class="chip" href="/v1/taxonomy" target="_blank" rel="noreferrer">Taxonomy</a>
       <button type="button" id="out" class="hide">Sign out</button>
     </div>
   </header>
 
-  <section id="auth" class="hero">
-    <div class="pitch">
-      <div class="eyebrow">Not just labels — full support operations output</div>
-      <h2>Route every ticket with <em>queue, SLA & risk</em>.</h2>
-      <p class="lede">TriageForge classifies into a 12-category taxonomy, assigns an ops queue, sets SLA hours, scores severity, flags churn/fraud/legal risk, and drafts the next actions — with PII stripped before the model runs.</p>
-      <div class="tax" id="taxPreview">Loading taxonomy…</div>
-      <div class="diff">
-        <div><strong>12 categories</strong><span>billing, refund, outage, security, shipping…</span></div>
-        <div><strong>Queue routing</strong><span>billing_ops, engineering, trust_safety…</span></div>
-        <div><strong>SLA + severity</strong><span>Hours-to-respond and 1–10 severity score</span></div>
-        <div><strong>Risk & actions</strong><span>Churn/fraud/legal flags + next steps</span></div>
-      </div>
+  <!-- AUTH -->
+  <section id="auth" class="auth-wrap">
+    <h2>Sign in</h2>
+    <p class="sub">Create an analyst account to triage tickets. Username: letters/numbers/_ · Password: 8+ chars.</p>
+    <div class="field"><label for="u">Username</label>
+      <input id="u" autocomplete="username" spellcheck="false" placeholder="ops_analyst"></div>
+    <div class="field"><label for="pw">Password</label>
+      <div class="pw-wrap">
+        <input id="pw" type="password" autocomplete="current-password" placeholder="min 8 characters">
+        <button type="button" class="eye" id="eye">Show</button>
+      </div></div>
+    <div class="actions">
+      <button type="button" class="primary" id="login">Sign in</button>
+      <button type="button" id="reg">Create account</button>
     </div>
-    <div class="auth">
-      <h3>Analyst sign-in</h3>
-      <p class="hint">Username: letters/numbers/_ (3–32). Password: 8+ characters.</p>
-      <div class="field"><label for="u">Username</label>
-        <input id="u" autocomplete="username" spellcheck="false" placeholder="e.g. ops_analyst"></div>
-      <div class="field"><label for="pw">Password</label>
-        <div class="pw-wrap">
-          <input id="pw" type="password" autocomplete="current-password" placeholder="min 8 characters">
-          <button type="button" class="eye" id="eye" aria-label="Show password">Show</button>
-        </div></div>
-      <div class="actions">
-        <button type="button" class="primary" id="login">Sign in</button>
-        <button type="button" id="reg">Create account</button>
-      </div>
-      <div class="msg err" id="aerr"></div>
-      <div class="msg ok" id="aok"></div>
-      <p class="tiny">Tip: create once, then Sign in. Use Show to verify your password.</p>
-    </div>
+    <div class="msg err" id="aerr"></div>
+    <div class="msg ok" id="aok"></div>
   </section>
 
-  <section id="app" class="app hide">
-    <div class="flow" id="flow">
-      <div class="step" data-s="auth"><b>Auth</b>JWT gate</div>
-      <div class="step" data-s="validate"><b>Validate</b>Pydantic v2</div>
-      <div class="step" data-s="redact"><b>Redact</b>PII shield</div>
-      <div class="step" data-s="infer"><b>Infer</b>Open model</div>
-      <div class="step" data-s="ops"><b>Ops pack</b>Queue · SLA · Risk</div>
-    </div>
+  <!-- APP -->
+  <section id="app" class="hide">
+    <div class="layout">
+      <!-- LEFT: intake form -->
+      <div class="card">
+        <h3>Ticket intake</h3>
+        <p class="desc">Select category and priority first, then paste the customer message.</p>
 
-    <div class="toolbar">
-      <div class="seg">
-        <button type="button" id="ver2" class="active">/v2 ops triage</button>
-        <button type="button" id="ver1">/v1 classic</button>
-      </div>
-      <span class="chip" id="verhint">Full ops pack: queue, SLA, severity, risks, actions</span>
-      <div class="sp"></div>
-      <button type="button" id="copyjson">Copy last JSON</button>
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="panel">
-          <h3>Incoming ticket</h3>
-          <textarea id="text" placeholder="Paste a customer ticket…"></textarea>
-          <div class="samples" id="samples"></div>
-          <div class="shield">
-            <div class="label">PII shield — model-visible text</div>
-            <div id="shield" class="empty">(nothing yet)</div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="category"><span class="stepno">1</span>Category</label>
+            <select id="category" required>
+              <option value="">Select category…</option>
+              <option value="billing">Billing</option>
+              <option value="refund">Refund</option>
+              <option value="bug">Bug</option>
+              <option value="outage">Outage</option>
+              <option value="feature_request">Feature request</option>
+              <option value="account">Account</option>
+              <option value="security">Security</option>
+              <option value="shipping">Shipping</option>
+              <option value="onboarding">Onboarding</option>
+              <option value="cancellation">Cancellation</option>
+              <option value="compliance">Compliance</option>
+              <option value="other">Other</option>
+            </select>
           </div>
-          <div class="row">
-            <select id="tier" style="width:auto"><option value="">tier: any</option><option>free</option><option>pro</option><option>enterprise</option></select>
-            <select id="channel" style="width:auto"><option value="">channel: unknown</option><option>email</option><option>chat</option><option>phone</option><option>social</option></select>
-            <input id="product" placeholder="product area (optional)" style="width:160px;padding:10px 12px;border-radius:10px;border:1px solid var(--line)">
-            <div class="sp"></div>
-            <button type="button" class="primary" id="go">Run ops triage</button>
+          <div class="field">
+            <label for="priority"><span class="stepno">2</span>Priority</label>
+            <select id="priority" required>
+              <option value="">Select priority…</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
           </div>
-          <div class="msg err" id="err"></div>
+          <div class="field full">
+            <label for="text"><span class="stepno">3</span>Customer message</label>
+            <textarea id="text" placeholder="Paste the customer ticket here…"></textarea>
+            <div class="samples" id="samples"></div>
+          </div>
+          <div class="field">
+            <label for="tier"><span class="stepno">4</span>Customer tier</label>
+            <select id="tier">
+              <option value="">Any</option>
+              <option value="free">Free</option>
+              <option value="pro">Pro</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="channel">Channel</label>
+            <select id="channel">
+              <option value="">Unknown</option>
+              <option value="email">Email</option>
+              <option value="chat">Chat</option>
+              <option value="phone">Phone</option>
+              <option value="social">Social</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="product">Product area (optional)</label>
+            <input id="product" placeholder="e.g. checkout, mobile app, billing portal">
+          </div>
         </div>
-        <div class="panel" style="margin-top:14px">
-          <h3>Session history</h3>
-          <div class="hist" id="hist"><div class="empty">No tickets yet — try a sample scenario.</div></div>
+
+        <div class="pii">
+          <div class="lbl">PII shield — text sent to the model</div>
+          <div class="view" id="shield">(nothing yet)</div>
         </div>
+
+        <div class="foot-actions">
+          <button type="button" id="reset">Clear</button>
+          <button type="button" class="primary" id="go">Generate ops pack</button>
+        </div>
+        <div class="msg err" id="err"></div>
       </div>
 
+      <!-- RIGHT: results -->
       <div>
-        <div class="panel">
+        <div class="card">
           <h3>Operations result</h3>
-          <div id="res" class="empty">Run triage to see category, queue, SLA, severity, risks and actions.</div>
+          <p class="desc">Queue, SLA, severity, risks, next actions, and customer reply.</p>
+          <div id="res"><div class="result-empty">Fill the intake form and click <b>Generate ops pack</b>.</div></div>
         </div>
-        <div class="panel" style="margin-top:14px">
-          <h3>Your AI controls</h3>
-          <div class="k">Tokens today <span id="tk"></span></div><div class="bar"><i id="tkb"></i></div>
-          <div class="k">Requests this minute <span id="rq"></span></div><div class="bar"><i id="rqb"></i></div>
-          <p class="tiny">Over limit → HTTP 429 + Retry-After.</p>
-        </div>
-        <div class="panel" style="margin-top:14px">
-          <h3>Why this wins demos</h3>
-          <div class="diff" style="grid-template-columns:1fr">
-            <div><strong>Beyond basic labels</strong><span>Colleagues often stop at category/priority. We add queue, SLA, severity, risk flags, keywords, next actions.</span></div>
-            <div><strong>Schema-first AI</strong><span>Model output is re-validated with Pydantic; invalid JSON is repaired once, then rejected.</span></div>
-            <div><strong>Privacy boundary</strong><span>Email/phone/card redacted before inference — visible live in the PII shield.</span></div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Usage</h3>
+          <p class="desc" style="margin-bottom:10px">AI rate limit and daily token quota for your account.</p>
+          <div class="metrics">
+            <div class="metric"><div class="k">Tokens today</div><div class="v" id="tk">—</div></div>
+            <div class="metric"><div class="k">Requests / min</div><div class="v" id="rq">—</div></div>
           </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Session history</h3>
+          <div class="hist" id="hist"><div class="result-empty" style="padding:12px">No tickets yet.</div></div>
         </div>
       </div>
     </div>
+
+    <p class="dev">
+      Developer links (for assignment / API review):
+      <a href="/docs" target="_blank" rel="noreferrer">OpenAPI docs</a>
+      <a href="/v1/taxonomy" target="_blank" rel="noreferrer">Taxonomy JSON</a>
+    </p>
   </section>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
 let token=sessionStorage.getItem("tf_token"), user=sessionStorage.getItem("tf_user");
-let hist=[], apiVer="v2", lastJson=null;
+let hist=[], lastJson=null;
 const USER_RE=/^[a-zA-Z0-9_]{3,32}$/;
-const SAMPLES={
-  "Billing dispute":"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable.",
-  "Security alert":"I got an unauthorized login email. Please lock my account. Card on file 4242 4242 4242 4242 if you need to verify.",
-  "Shipping delay":"My order tracking shows no movement for 8 days. Delivery was promised last Friday. Need a replacement shipped urgently.",
-  "Cancellation risk":"I want to cancel my subscription today. Your product is terrible after the last update and I may escalate legally.",
-  "Feature ask":"It would be great if you could export reports to CSV for our finance team. Not urgent, just a suggestion."
-};
 const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
+
+// Samples pre-fill category + priority + text (guided demo)
+const SAMPLES=[
+  {label:"Billing dispute", category:"billing", priority:"urgent", tier:"pro", channel:"email",
+   text:"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable."},
+  {label:"Security alert", category:"security", priority:"urgent", tier:"enterprise", channel:"email",
+   text:"I got an unauthorized login email. Please lock my account. Card on file 4242 4242 4242 4242 if you need to verify."},
+  {label:"Shipping delay", category:"shipping", priority:"high", tier:"pro", channel:"chat",
+   text:"My order tracking shows no movement for 8 days. Delivery was promised last Friday. Need a replacement shipped soon."},
+  {label:"Cancellation risk", category:"cancellation", priority:"high", tier:"pro", channel:"email",
+   text:"I want to cancel my subscription today. Your product is terrible after the last update and I may escalate legally."},
+  {label:"Feature ask", category:"feature_request", priority:"low", tier:"free", channel:"chat",
+   text:"It would be great if you could export reports to CSV for our finance team. Not urgent, just a suggestion."}
+];
 
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
 function detailMessage(d,status){
@@ -280,22 +298,20 @@ function show(authed){
   $("out").classList.toggle("hide",!authed);
   $("who").classList.toggle("hide",!authed);
   $("who").textContent=user?("@"+user):"";
-  if(authed) setFlow(["auth"],[]);
 }
 function logout(){token=user=null;sessionStorage.clear();show(false);$("aerr").textContent="";$("aok").textContent=""}
 function validateCreds(){
   const u=$("u").value.trim(),p=$("pw").value;
   if(!u) return "Enter a username";
-  if(!USER_RE.test(u)) return "Username must be 3–32 chars: letters, numbers, underscore only";
-  if(!p) return "Enter a password";
-  if(p.length<8) return "Password must be at least 8 characters";
+  if(!USER_RE.test(u)) return "Username: 3–32 chars, letters/numbers/underscore only";
+  if(!p||p.length<8) return "Password must be at least 8 characters";
   return null;
 }
-function setBusy(b){$("login").disabled=b;$("reg").disabled=b;$("login").textContent=b?"Working…":"Sign in";$("reg").textContent=b?"Working…":"Create account"}
 async function signin(register){
   $("aerr").textContent="";$("aok").textContent="";
   const problem=validateCreds(); if(problem){$("aerr").textContent=problem;return}
-  const u=$("u").value.trim(),p=$("pw").value; setBusy(true);
+  const u=$("u").value.trim(),p=$("pw").value;
+  $("login").disabled=$("reg").disabled=true;
   try{
     if(register){
       await api("/v1/auth/register",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({username:u,password:p})});
@@ -306,176 +322,176 @@ async function signin(register){
     sessionStorage.setItem("tf_token",token); sessionStorage.setItem("tf_user",u);
     show(true); usage();
   }catch(e){$("aerr").textContent=e.message;$("aok").textContent=""}
-  finally{setBusy(false)}
-}
-function setFlow(active,done){
-  document.querySelectorAll("#flow .step").forEach(s=>{
-    s.classList.toggle("active",active.includes(s.dataset.s));
-    s.classList.toggle("done",done.includes(s.dataset.s));
-  });
+  finally{$("login").disabled=$("reg").disabled=false; $("login").textContent="Sign in"; $("reg").textContent="Create account"}
 }
 function shield(){
-  const box=$("shield"); box.textContent=""; box.className="";
-  let t=$("text").value; if(!t){box.textContent="(nothing yet)"; box.className="empty"; return}
+  const box=$("shield"); box.textContent="";
+  let t=$("text").value; if(!t){box.textContent="(nothing yet)"; return}
   for(const[l,re]of PII) t=t.replace(re,"\u0001"+l+"\u0002");
   t.split(/(\u0001\w+\u0002)/).forEach(s=>{
     if(s[0]==="\u0001") box.appendChild(el("span","tag","["+s.slice(1,-1)+"]"));
     else if(s) box.appendChild(document.createTextNode(s));
   });
 }
-function bar(i,used,max){$(i).style.width=Math.min(100,max?used/max*100:0)+"%"}
 async function usage(){
   try{
     const u=await api("/v1/usage/me");
     $("tk").textContent=`${u.tokens_used_today} / ${u.daily_quota}`;
     $("rq").textContent=`${u.requests_last_minute} / ${u.rate_limit_per_min}`;
-    bar("tkb",u.tokens_used_today,u.daily_quota); bar("rqb",u.requests_last_minute,u.rate_limit_per_min);
   }catch{}
 }
+function pretty(s){return String(s||"").replaceAll("_"," ")}
+
 function render(d){
   lastJson=d;
-  const r=$("res"); r.className="result-enter"; r.textContent="";
-  const top=el("div","row"); top.style.marginTop="0";
-  top.append(el("span","badge "+d.priority,d.priority.toUpperCase()));
-  top.append(el("span","chip",String(d.category).replaceAll("_"," ")));
-  if(d.sentiment) top.append(el("span","chip",d.sentiment));
-  top.append(el("span","chip",d.ticket_id));
-  r.append(top);
-  r.append(el("p","",d.summary));
+  const r=$("res"); r.textContent="";
+
+  const head=el("div","result-head");
+  head.append(el("span","badge "+d.priority, d.priority));
+  head.append(el("span","pill", pretty(d.category)));
+  if(d.sentiment) head.append(el("span","pill", d.sentiment));
+  head.append(el("span","pill", d.ticket_id));
+  r.append(head);
+
+  r.append(el("p","summary", d.summary));
 
   if(d.assigned_queue!=null){
-    const g=el("div","stats");
+    const metrics=el("div","metrics");
     [
-      ["Queue", String(d.assigned_queue).replaceAll("_"," ")],
+      ["Queue", pretty(d.assigned_queue)],
       ["SLA", d.sla_hours+" hours"],
-      ["Severity", d.severity_score+"/10"],
-      ["Channel", d.channel||"unknown"],
-      ["Language", d.language||"en"],
-      ["Model", d.model]
-    ].forEach(([k,v])=>{const c=el("div","stat"); c.append(el("div","k",k),el("div","v",v)); g.append(c)});
-    r.append(g);
+      ["Severity", d.severity_score+" / 10"],
+      ["Channel", pretty(d.channel||"unknown")],
+      ["Confidence", d.confidence!=null? Math.round(d.confidence*100)+"%":"—"],
+      ["Latency", (d.latency_ms??"—")+" ms"]
+    ].forEach(([k,v])=>{
+      const m=el("div","metric"); m.append(el("div","k",k), el("div","v",v)); metrics.append(m);
+    });
+    r.append(metrics);
 
-    const sev=el("div","sev");
-    sev.append(el("div","k","Severity meter"));
-    const meter=el("div","sevmeter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); sev.append(meter);
-    r.append(sev);
+    const sev=el("div","block");
+    sev.append(el("h4","","Severity"));
+    const row=el("div","sev-row");
+    row.append(el("strong","", String(d.severity_score)));
+    const meter=el("div","meter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); row.append(meter);
+    sev.append(row); r.append(sev);
 
-    const esc=el("div", d.escalation_required?"esc":"esc safe");
-    esc.textContent=d.escalation_required
-      ? ("Escalation required — "+(d.escalation_reason||"high risk"))
+    const banner=el("div", d.escalation_required?"banner hot":"banner safe");
+    banner.textContent=d.escalation_required
+      ? ("Escalation required — "+(d.escalation_reason||""))
       : ("No escalation — "+(d.escalation_reason||"standard path"));
-    r.append(esc);
+    r.append(banner);
 
     if(d.risk_flags?.length){
-      r.append(el("div","k","Risk flags"));
-      const kw=el("div","kw");
-      d.risk_flags.forEach(f=>kw.appendChild(el("span","",String(f).replaceAll("_"," "))));
-      r.append(kw);
+      const b=el("div","block"); b.append(el("h4","","Risk flags"));
+      const c=el("div","chips"); d.risk_flags.forEach(f=>c.appendChild(el("span","",pretty(f)))); b.append(c); r.append(b);
     }
     if(d.keywords?.length){
-      r.append(el("div","k","Keywords"));
-      const kw=el("div","kw");
-      d.keywords.forEach(f=>kw.appendChild(el("span","",f)));
-      r.append(kw);
+      const b=el("div","block"); b.append(el("h4","","Keywords"));
+      const c=el("div","chips"); d.keywords.forEach(f=>c.appendChild(el("span","",f))); b.append(c); r.append(b);
     }
     if(d.next_actions?.length){
-      r.append(el("div","k","Next actions for the agent"));
-      const al=el("div","actions-list");
-      d.next_actions.forEach((a,idx)=>al.appendChild(el("span","",(idx+1)+". "+a)));
-      r.append(al);
-    }
-    if(d.confidence!=null){
-      r.append(el("div","k","Confidence "+Math.round(d.confidence*100)+"% · latency "+d.latency_ms+" ms"));
-      const cb=el("div","bar"); const ci=el("i"); ci.style.width=(d.confidence*100)+"%"; cb.append(ci); r.append(cb);
+      const b=el("div","block"); b.append(el("h4","","Next actions"));
+      const ul=el("ul","list");
+      d.next_actions.forEach((a,idx)=>{const li=el("li"); li.append(el("b","",String(idx+1)), document.createTextNode(a)); ul.append(li)});
+      b.append(ul); r.append(b);
     }
     if(d.pii_redacted){
       const pk=Object.entries(d.pii_redacted);
-      r.append(el("div","k","PII masked before inference"));
-      r.append(el("div","v", pk.length?pk.map(([k,v])=>`${v} ${k}`).join(", "):"none found"));
+      const b=el("div","block"); b.append(el("h4","","PII masked"));
+      b.append(el("div","tiny", pk.length? pk.map(([k,v])=>`${v} ${k}`).join(" · ") : "None found"));
+      r.append(b);
     }
     if(d.suggested_reply){
-      const hd=el("div","row"); hd.append(el("div","k","Suggested reply"),el("div","sp"));
+      const b=el("div","block");
+      const tools=el("div","reply-tools");
+      tools.append(el("h4","","Suggested customer reply"));
       const cp=el("button","","Copy reply"); cp.type="button";
-      cp.onclick=()=>{navigator.clipboard.writeText(d.suggested_reply); cp.textContent="Copied"};
-      hd.append(cp); r.append(hd, el("div","reply", d.suggested_reply));
+      cp.onclick=async()=>{await navigator.clipboard.writeText(d.suggested_reply); cp.textContent="Copied"; setTimeout(()=>cp.textContent="Copy reply",1000)};
+      tools.append(cp); b.append(tools);
+      b.append(el("div","reply-box", d.suggested_reply));
+      r.append(b);
     }
+    const exportRow=el("div","foot-actions"); exportRow.style.borderTop="0"; exportRow.style.paddingTop="0";
+    const cj=el("button","","Copy full JSON"); cj.type="button";
+    cj.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(d,null,2)); cj.textContent="Copied JSON"; setTimeout(()=>cj.textContent="Copy full JSON",1000)};
+    exportRow.append(cj); r.append(exportRow);
   } else {
-    r.append(el("p","tiny","v1 classic contract: category / priority / summary only."));
-    const g=el("div","stats");
-    [["Model",d.model],["Tokens",`${d.usage.prompt_tokens} in / ${d.usage.completion_tokens} out`]].forEach(([k,v])=>{
-      const c=el("div","stat"); c.append(el("div","k",k),el("div","v",v)); g.append(c);
-    });
-    r.append(g);
+    r.append(el("p","tiny","Classic v1 fields only."));
   }
 }
+
 function addHist(t,d){
-  hist.unshift({t,d}); const h=$("hist"); h.textContent="";
-  hist.slice(0,8).forEach(x=>{
+  hist.unshift({t,d});
+  const h=$("hist"); h.textContent="";
+  hist.slice(0,6).forEach(x=>{
     const row=el("button"); row.type="button";
-    row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()), el("span","t", `${x.d.category} · ${x.t}`));
-    row.onclick=()=>render(x.d); h.append(row);
+    row.append(el("span","badge "+x.d.priority, x.d.priority[0].toUpperCase()));
+    row.append(el("span","t", pretty(x.d.category)+" · "+x.t));
+    row.onclick=()=>render(x.d);
+    h.append(row);
   });
 }
+
 async function go(){
   $("err").textContent="";
+  const category=$("category").value;
+  const priority=$("priority").value;
   const text=$("text").value.trim();
-  if(text.length<10){$("err").textContent="Ticket must be at least 10 characters"; return}
-  const body={text};
+  if(!category){$("err").textContent="Step 1: select a category"; $("category").focus(); return}
+  if(!priority){$("err").textContent="Step 2: select a priority"; $("priority").focus(); return}
+  if(text.length<10){$("err").textContent="Step 3: paste a ticket (at least 10 characters)"; $("text").focus(); return}
+
+  const body={category, priority, text};
   if($("tier").value) body.customer_tier=$("tier").value;
   if($("channel").value) body.channel=$("channel").value;
   if($("product").value.trim()) body.product_area=$("product").value.trim();
-  $("go").disabled=true; $("go").textContent="Analyzing…";
-  setFlow(["validate","redact","infer"],["auth"]);
+
+  $("go").disabled=true; $("go").textContent="Generating…";
   try{
-    const path=apiVer==="v1"?"/v1/triage":"/v2/triage";
-    const d=await api(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    setFlow([],["auth","validate","redact","infer","ops"]);
+    const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
     render(d); addHist(text,d);
-  }catch(e){setFlow(["auth"],[]); $("err").textContent=e.message}
-  $("go").disabled=false; $("go").textContent="Run ops triage"; usage();
+  }catch(e){$("err").textContent=e.message}
+  $("go").disabled=false; $("go").textContent="Generate ops pack"; usage();
 }
-function setVersion(v){
-  apiVer=v;
-  $("ver1").classList.toggle("active",v==="v1");
-  $("ver2").classList.toggle("active",v==="v2");
-  $("verhint").textContent=v==="v2"?"Full ops pack: queue, SLA, severity, risks, actions":"Frozen v1: category, priority, summary only";
+
+function applySample(s){
+  $("category").value=s.category;
+  $("priority").value=s.priority;
+  $("text").value=s.text;
+  $("tier").value=s.tier||"";
+  $("channel").value=s.channel||"";
+  $("product").value="";
+  shield();
 }
+
+function resetForm(){
+  $("category").value=""; $("priority").value=""; $("text").value="";
+  $("tier").value=""; $("channel").value=""; $("product").value="";
+  $("err").textContent=""; shield();
+}
+
 $("eye").onclick=()=>{
   const pw=$("pw"), show=pw.type==="password";
-  pw.type=show?"text":"password";
-  $("eye").textContent=show?"Hide":"Show";
-  $("eye").setAttribute("aria-label", show?"Hide password":"Show password");
+  pw.type=show?"text":"password"; $("eye").textContent=show?"Hide":"Show";
 };
-Object.entries(SAMPLES).forEach(([k,v])=>{
-  const b=el("button","",k); b.type="button";
-  b.onclick=()=>{$("text").value=v; shield()};
+SAMPLES.forEach(s=>{
+  const b=el("button","",s.label); b.type="button";
+  b.onclick=()=>applySample(s);
   $("samples").append(b);
 });
 $("text").oninput=shield;
 $("go").onclick=go;
+$("reset").onclick=resetForm;
 $("login").onclick=()=>signin(false);
 $("reg").onclick=()=>signin(true);
 $("out").onclick=logout;
-$("ver1").onclick=()=>setVersion("v1");
-$("ver2").onclick=()=>setVersion("v2");
-$("copyjson").onclick=()=>{
-  if(!lastJson){alert("Run a triage first"); return}
-  navigator.clipboard.writeText(JSON.stringify(lastJson,null,2));
-  $("copyjson").textContent="Copied JSON";
-  setTimeout(()=>$("copyjson").textContent="Copy last JSON",1200);
-};
 $("pw").onkeydown=e=>{if(e.key==="Enter") signin(false)};
-$("u").onkeydown=e=>{if(e.key==="Enter") $("pw").focus()};
 
 fetch("/readyz").then(r=>r.json()).then(d=>{
   $("prov").textContent="model: "+(d.provider||"offline");
-  $("prov").classList.add(d.provider?"ok":"bad");
-}).catch(()=>{$("prov").textContent="model: offline"; $("prov").classList.add("bad")});
-
-fetch("/v1/taxonomy").then(r=>r.json()).then(d=>{
-  const box=$("taxPreview"); box.textContent="";
-  (d.categories||[]).forEach(c=>box.appendChild(el("span","",c.replaceAll("_"," "))));
-}).catch(()=>{$("taxPreview").textContent="Taxonomy unavailable"});
+  if(d.provider) $("prov").classList.add("ok");
+}).catch(()=>{$("prov").textContent="model: offline"});
 
 if(token){show(true); usage()}
 </script>

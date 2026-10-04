@@ -76,6 +76,9 @@ class TokenResponse(BaseModel):
 # ---------- triage ----------
 class TriageRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    # Analyst-guided intake (UI collects these first)
+    category: Category | None = Field(default=None, description="Analyst-selected category")
+    priority: Priority | None = Field(default=None, description="Analyst-selected priority")
     text: str = Field(min_length=10, max_length=4000, description="Raw customer ticket")
     customer_tier: str | None = Field(default=None, pattern=r"^(free|pro|enterprise)$")
     channel: Channel | None = Field(default=None, description="How the ticket arrived")
