@@ -168,3 +168,32 @@ def test_suggest_and_feedback(client):
         headers=h,
     )
     assert fb.status_code == 200 and fb.json()["stored"] is True
+
+
+def test_history_sidebar_and_dashboard(client):
+    h = auth(client, "jade")
+    t1 = client.post(
+        "/v2/triage",
+        json={"text": TICKET["text"], "category": "billing", "priority": "urgent"},
+        headers=h,
+    ).json()
+    client.post(
+        "/v2/triage",
+        json={
+            "text": "Export CSV would be great. Not urgent, just a suggestion.",
+            "category": "feature_request",
+            "priority": "low",
+        },
+        headers=h,
+    )
+    hist = client.get("/v1/history", headers=h)
+    assert hist.status_code == 200 and len(hist.json()) == 2
+    detail = client.get(f"/v1/history/{t1['ticket_id']}", headers=h)
+    assert detail.status_code == 200
+    assert detail.json()["result"]["ticket_id"] == t1["ticket_id"]
+    pinned = client.post(f"/v1/history/{t1['ticket_id']}/pin", headers=h)
+    assert pinned.status_code == 200 and pinned.json()["pinned"] is True
+    dash = client.get("/v1/dashboard", headers=h).json()
+    assert dash["total_tickets"] == 2
+    assert dash["by_category"]["billing"] == 1
+    assert dash["pinned"] == 1

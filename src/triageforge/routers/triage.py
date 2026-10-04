@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..deps import (
     FeedbackDep,
+    HistoryDep,
     LimiterDep,
     MeterDep,
     ProviderDep,
@@ -68,10 +69,16 @@ async def triage_v1(
 
 @router.post("/v2/triage", response_model=TriageV2)
 async def triage_v2(
-    req: TriageRequest, provider: ProviderDep, meter: MeterDep, user: UserDep
+    req: TriageRequest,
+    provider: ProviderDep,
+    meter: MeterDep,
+    user: UserDep,
+    history: HistoryDep,
 ) -> TriageV2:
     """v2 ops triage: queue, SLA due, severity, risks, notes, tone-aware reply."""
-    return await _run(req, provider, meter, user)
+    result = await _run(req, provider, meter, user)
+    history.add(user, req.text, result.model_dump(mode="json"))
+    return result
 
 
 @router.post("/v2/suggest", response_model=SuggestResponse)

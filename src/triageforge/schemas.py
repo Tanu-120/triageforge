@@ -213,3 +213,32 @@ class TaxonomyResponse(BaseModel):
     risk_flags: list[str]
     sentiments: list[str]
     reply_tones: list[str]
+
+
+class HistoryItem(BaseModel):
+    ticket_id: str
+    preview: str
+    pinned: bool
+    created_at: str
+    category: str
+    priority: str
+    severity_score: int
+    assigned_queue: str
+
+
+class HistoryDetail(HistoryItem):
+    result: TriageV2
+
+
+class DashboardStats(BaseModel):
+    total_tickets: int
+    escalations: int
+    avg_severity: float
+    pinned: int
+    feedback_count: int
+    helpful_rate: float | None
+    tokens_used_today: int
+    daily_quota: int
+    by_category: dict[str, int]
+    by_priority: dict[str, int]
+    by_queue: dict[str, int]

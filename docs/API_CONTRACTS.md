@@ -11,6 +11,12 @@ Base URL `http://localhost:8000` · OpenAPI at `/docs` and `/openapi.json`.
 | POST | `/v2/suggest` | JWT | Auto-suggest category + priority |
 | POST | `/v2/triage` | JWT | Full ops triage pack |
 | POST | `/v1/feedback` | JWT | Analyst helpful / needs-work vote |
+| GET | `/v1/history` | JWT | Sidebar history list |
+| GET | `/v1/history/{id}` | JWT | Reload a previous ops pack |
+| POST | `/v1/history/{id}/pin` | JWT | Pin / unpin history item |
+| DELETE | `/v1/history/{id}` | JWT | Delete one history item |
+| DELETE | `/v1/history` | JWT | Clear all history |
+| GET | `/v1/dashboard` | JWT | Analyst dashboard KPIs |
 | GET | `/v1/usage/me` | JWT | Rate-limit & token usage |
 | GET | `/healthz` `/readyz` | – | Liveness / model readiness |
 

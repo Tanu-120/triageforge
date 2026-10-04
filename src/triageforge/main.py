@@ -8,9 +8,9 @@ from fastapi.responses import FileResponse
 
 from . import __version__
 from .config import get_settings
-from .controls import FeedbackStore, RateLimiter, UsageMeter, UserStore
+from .controls import FeedbackStore, HistoryStore, RateLimiter, UsageMeter, UserStore
 from .providers import build_provider
-from .routers import auth, health, triage
+from .routers import auth, health, triage, workspace
 
 
 @asynccontextmanager
@@ -22,6 +22,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.limiter = RateLimiter(s.rate_limit_per_min)
         app.state.meter = UsageMeter(s.daily_token_quota)
         app.state.feedback = FeedbackStore()
+        app.state.history = HistoryStore()
         yield
 
 
@@ -34,6 +35,7 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(triage.router)
+app.include_router(workspace.router)
 
 
 def _console_index() -> Path:

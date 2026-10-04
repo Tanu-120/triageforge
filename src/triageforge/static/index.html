@@ -9,246 +9,242 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,650;9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#efebe3; --ink:#18201c; --mute:#617068; --line:#d5cdc0; --panel:#fffcf7;
+  --bg:#efebe3; --ink:#18201c; --mute:#617068; --line:#d5cdc0; --panel:#fffcf7; --side:#f7f3ea;
   --acc:#0f766e; --acc-soft:#e6f5f3; --bad:#b91c1c; --ok:#047857; --warn:#c2410c; --info:#1d4ed8;
   --shadow:0 10px 30px rgba(40,32,20,.07);
   --sans:"DM Sans",system-ui,sans-serif; --display:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font:15px/1.5 var(--sans);color:var(--ink);
-  background:linear-gradient(180deg,#f4f0e8 0%, var(--bg) 40%, #e7e1d5 100%)}
-a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+  background:linear-gradient(180deg,#f4f0e8 0%, var(--bg) 45%, #e7e1d5 100%)}
 button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px}
+button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px}
 button:hover{border-color:var(--acc)}
 button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
-button.primary:hover{filter:brightness(1.06)}
-button:disabled{opacity:.55;cursor:wait}
 button.ghost{background:var(--acc-soft);border-color:transparent;color:var(--acc);font-weight:700}
+button:disabled{opacity:.55;cursor:wait}
 .hide{display:none!important}
-.shell{max-width:1120px;margin:0 auto;padding:20px 20px 40px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.mark{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--acc);color:#fff;font:700 15px/1 var(--display)}
-.brand h1{margin:0;font:700 26px/1 var(--display)}
-.brand p{margin:2px 0 0;color:var(--mute);font-size:12px}
-.sp{flex:1}
-.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.chip{font:500 11px var(--mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,252,247,.9);color:var(--mute)}
-.chip.ok{background:#ecfdf5;color:var(--ok);border-color:#a7f3d0}
-.toast{position:fixed;right:16px;bottom:16px;z-index:50;background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.25s}
+.toast{position:fixed;right:16px;bottom:16px;z-index:80;background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;opacity:0;transform:translateY(8px);transition:.25s}
 .toast.show{opacity:1;transform:none}
 
-.auth-wrap{max-width:420px;margin:48px auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.auth-wrap{max-width:420px;margin:60px auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
 .auth-wrap h2{margin:0 0 6px;font:700 28px/1.15 var(--display)}
-.auth-wrap .sub{margin:0 0 20px;color:var(--mute);font-size:14px}
-.field{margin-bottom:14px}
+.auth-wrap .sub{margin:0 0 18px;color:var(--mute);font-size:14px}
+.field{margin-bottom:12px}
 .field label{display:block;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--mute)}
-.field input,.field select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
+.field input,.field select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
 .field input:focus,.field select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(15,118,110,.12)}
-.pw-wrap{position:relative}
-.pw-wrap input{padding-right:70px}
-.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);font-size:12px;font-weight:700;padding:8px}
-.actions{display:flex;gap:10px;margin-top:4px}
-.actions button{flex:1}
-.msg{min-height:18px;margin-top:12px;font-size:13px}
-.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
+.pw-wrap{position:relative}.pw-wrap input{padding-right:70px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);font-size:12px;font-weight:700}
+.actions{display:flex;gap:10px}.actions button{flex:1}
+.msg{min-height:18px;margin-top:10px;font-size:13px}.msg.err{color:var(--bad)}.msg.ok{color:var(--ok)}
 
-.layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-@media(max-width:900px){.layout{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.app-shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+@media(max-width:960px){.app-shell{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:min(86vw,300px);z-index:40;transform:translateX(-105%);transition:transform .2s}.sidebar.open{transform:none;display:flex}.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35}.scrim.show{display:block}}
+.sidebar{background:var(--side);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:12px;position:sticky;top:0;height:100vh}
+.side-brand{display:flex;align-items:center;gap:10px;padding:4px 6px 10px}
+.mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--acc);color:#fff;font:700 14px/1 var(--display)}
+.side-brand strong{display:block;font:700 16px/1.1 var(--display)}
+.side-brand span{font-size:11px;color:var(--mute)}
+.side-search input{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:#fff}
+.side-tools{display:flex;gap:6px}
+.side-tools button{flex:1;font-size:12px;padding:7px}
+.hist-list{overflow:auto;flex:1;display:flex;flex-direction:column;gap:8px}
+.hist-item{text-align:left;width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;gap:4px}
+.hist-item.active{border-color:var(--acc);background:var(--acc-soft)}
+.hist-item .row{display:flex;gap:6px;align-items:center}
+.hist-item .preview{font-size:12px;color:var(--mute);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hist-item .meta{font:500 10px var(--mono);color:var(--mute)}
+.badge{display:inline-flex;padding:3px 8px;border-radius:999px;font:700 10px/1 var(--mono);color:#fff;text-transform:uppercase}
+.urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:var(--info)}.low{background:var(--ok)}
+.pin{margin-left:auto;border:0;background:transparent;color:var(--mute);padding:2px 4px}
+.pin.on{color:var(--warn)}
+.empty-side{padding:18px 8px;text-align:center;color:var(--mute);font-size:13px}
+
+.main{padding:16px 18px 36px;min-width:0}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.tabs button{border:0;border-radius:0;background:transparent;font-weight:700;font-size:13px;color:var(--mute);padding:10px 14px}
+.tabs button.active{background:var(--acc-soft);color:var(--acc)}
+.sp{flex:1}
+.chip{font:500 11px var(--mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,252,247,.9);color:var(--mute)}
+.chip.ok{background:#ecfdf5;color:var(--ok);border-color:#a7f3d0}
+.menu-btn{display:none}@media(max-width:960px){.menu-btn{display:inline-flex}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
 .card h3{margin:0 0 4px;font:700 20px/1.2 var(--display)}
-.card .desc{margin:0 0 18px;color:var(--mute);font-size:13px}
-.stepno{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--acc-soft);color:var(--acc);font:700 11px/1 var(--mono);margin-right:8px}
+.card .desc{margin:0 0 14px;color:var(--mute);font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr}}
 .form-grid .full{grid-column:1/-1}
-textarea{min-height:120px;resize:vertical;line-height:1.45}
-.samples{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
-.samples button{font-size:12px;padding:7px 11px;border-radius:999px}
+textarea{min-height:110px;resize:vertical}
+.samples{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.samples button{font-size:12px;padding:6px 10px;border-radius:999px}
 .hint-box{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--acc-soft);color:#115e59;font-size:12px;display:none}
 .hint-box.show{display:block}
-.pii{margin-top:14px;padding:12px 14px;border-radius:12px;background:#fffbeb;border:1px solid #f1e0a8}
-.pii .lbl{font:700 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin-bottom:8px}
+.pii{margin-top:12px;padding:12px;border-radius:12px;background:#fffbeb;border:1px solid #f1e0a8}
+.pii .lbl{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#92400e;margin-bottom:6px}
 .tag{background:#fde68a;color:#78350f;padding:1px 6px;border-radius:5px;font:600 12px var(--mono)}
-.foot-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.foot-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 
-.result-empty{padding:28px 8px;text-align:center;color:var(--mute)}
-.result-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
-.badge{display:inline-flex;padding:5px 11px;border-radius:999px;font:700 11px/1 var(--mono);color:#fff;text-transform:uppercase}
-.urgent{background:var(--bad)}.high{background:var(--warn)}.medium{background:var(--info)}.low{background:var(--ok)}
-.pill{display:inline-flex;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font:500 12px var(--mono);color:var(--mute)}
-.summary{margin:0 0 14px;font-size:15px;line-height:1.55}
-.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.metric{padding:12px 14px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line)}
-.metric .k{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-.metric .v{font-size:15px;font-weight:700}
-.block{margin-bottom:16px}
-.block h4{margin:0 0 8px;font:700 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-.sev-row{display:flex;align-items:center;gap:12px}
-.meter{flex:1;height:10px;border-radius:99px;background:#e8e0d2;overflow:hidden}
-.meter i{display:block;height:100%;background:linear-gradient(90deg,#047857,#c2410c,#b91c1c)}
-.banner{padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.4;margin-bottom:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow)}
+.kpi .k{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font:700 26px/1.2 var(--display);margin-top:6px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 34px;gap:8px;align-items:center;font-size:12px}
+.bar-track{height:8px;border-radius:99px;background:#e8e0d2;overflow:hidden}
+.bar-track i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#0ea5a4)}
+.pill{display:inline-flex;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:#fff;font:500 12px var(--mono);color:var(--mute)}
+.result-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.summary{margin:0 0 12px;line-height:1.55}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.metric{padding:10px 12px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line)}
+.metric .k{font-size:11px;color:var(--mute);font-weight:700;text-transform:uppercase}
+.metric .v{font-weight:700;margin-top:2px}
+.block{margin-bottom:14px}
+.block h4{margin:0 0 8px;font:700 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.banner{padding:11px 12px;border-radius:12px;font-size:13px;margin-bottom:12px}
 .banner.safe{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
 .banner.hot{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
-.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
-.list li{display:flex;gap:10px;padding:10px 12px;border-radius:10px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
-.list li b{color:var(--acc);font:700 12px var(--mono);min-width:18px}
+.note{padding:11px 12px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.list li{display:flex;gap:8px;padding:9px 11px;border-radius:10px;background:#f6f1e7;border:1px solid var(--line);font-size:13px}
+.list li b{color:var(--acc);font:700 12px var(--mono)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips span{padding:6px 10px;border-radius:8px;background:#fff;border:1px solid var(--line);font-size:12px}
-.note{padding:12px 14px;border-radius:12px;background:#f6f1e7;border:1px solid var(--line);font-size:13px;line-height:1.5}
-.reply-box{padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);line-height:1.55;font-size:14px;white-space:pre-wrap}
-.reply-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.fb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.hist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.hist button{width:100%;text-align:left;display:flex;gap:10px;align-items:center;padding:10px 12px}
-.hist .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--mute)}
-.dev{margin-top:22px;text-align:center;font-size:12px;color:var(--mute)}
-.dev a{margin:0 8px;color:var(--mute)}
-.tiny{font-size:12px;color:var(--mute);margin-top:8px}
+.chips span{padding:5px 9px;border-radius:8px;background:#fff;border:1px solid var(--line);font-size:12px}
+.reply-box{padding:12px 14px;border-radius:12px;background:#fff;border:1px solid var(--line);white-space:pre-wrap;line-height:1.55}
+.reply-tools,.fb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.sev-row{display:flex;align-items:center;gap:10px}
+.meter{flex:1;height:10px;border-radius:99px;background:#e8e0d2;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#047857,#c2410c,#b91c1c)}
+.result-empty{padding:24px 8px;text-align:center;color:var(--mute)}
+.tiny{font-size:12px;color:var(--mute)}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
-<div class="shell">
-  <header class="top">
-    <div class="mark">TF</div>
-    <div class="brand">
-      <h1>TriageForge Ops</h1>
-      <p>Suggest → intake → ops pack → feedback</p>
+<div class="scrim" id="scrim"></div>
+
+<section id="auth" class="auth-wrap">
+  <h2>Sign in</h2>
+  <p class="sub">Analyst console with sidebar history + live dashboard.</p>
+  <div class="field"><label for="u">Username</label><input id="u" autocomplete="username" spellcheck="false" placeholder="ops_analyst"></div>
+  <div class="field"><label for="pw">Password</label>
+    <div class="pw-wrap"><input id="pw" type="password" autocomplete="current-password" placeholder="min 8 characters">
+    <button type="button" class="eye" id="eye">Show</button></div></div>
+  <div class="actions"><button type="button" class="primary" id="login">Sign in</button><button type="button" id="reg">Create account</button></div>
+  <div class="msg err" id="aerr"></div><div class="msg ok" id="aok"></div>
+</section>
+
+<section id="app" class="app-shell hide">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-brand"><div class="mark">TF</div><div><strong>TriageForge</strong><span>Ops history</span></div></div>
+    <div class="side-search"><input id="histSearch" placeholder="Search history…"></div>
+    <div class="side-tools">
+      <button type="button" id="refreshHist">Refresh</button>
+      <button type="button" id="clearHist">Clear</button>
     </div>
-    <div class="sp"></div>
-    <div class="meta">
-      <span class="chip" id="prov">model: …</span>
-      <span class="chip hide" id="who"></span>
-      <button type="button" id="out" class="hide">Sign out</button>
-    </div>
-  </header>
+    <div class="hist-list" id="histList"><div class="empty-side">No history yet. Run a triage.</div></div>
+  </aside>
 
-  <section id="auth" class="auth-wrap">
-    <h2>Sign in</h2>
-    <p class="sub">Create an analyst account. Username: letters/numbers/_ · Password: 8+ chars.</p>
-    <div class="field"><label for="u">Username</label>
-      <input id="u" autocomplete="username" spellcheck="false" placeholder="ops_analyst"></div>
-    <div class="field"><label for="pw">Password</label>
-      <div class="pw-wrap">
-        <input id="pw" type="password" autocomplete="current-password" placeholder="min 8 characters">
-        <button type="button" class="eye" id="eye">Show</button>
-      </div></div>
-    <div class="actions">
-      <button type="button" class="primary" id="login">Sign in</button>
-      <button type="button" id="reg">Create account</button>
-    </div>
-    <div class="msg err" id="aerr"></div>
-    <div class="msg ok" id="aok"></div>
-  </section>
-
-  <section id="app" class="hide">
-    <div class="layout">
-      <div class="card">
-        <h3>Ticket intake</h3>
-        <p class="desc">Paste a message, auto-suggest labels, adjust category/priority, then generate the ops pack.</p>
-
-        <div class="form-grid">
-          <div class="field full">
-            <label for="text"><span class="stepno">1</span>Customer message</label>
-            <textarea id="text" placeholder="Paste the customer ticket here…"></textarea>
-            <div class="samples" id="samples"></div>
-            <div class="foot-actions" style="border:0;padding-top:10px;margin-top:10px;justify-content:flex-start">
-              <button type="button" class="ghost" id="suggest">Auto-suggest category & priority</button>
-            </div>
-            <div class="hint-box" id="suggestHint"></div>
-          </div>
-
-          <div class="field">
-            <label for="category"><span class="stepno">2</span>Category</label>
-            <select id="category">
-              <option value="">Select category…</option>
-              <option value="billing">Billing</option>
-              <option value="refund">Refund</option>
-              <option value="bug">Bug</option>
-              <option value="outage">Outage</option>
-              <option value="feature_request">Feature request</option>
-              <option value="account">Account</option>
-              <option value="security">Security</option>
-              <option value="shipping">Shipping</option>
-              <option value="onboarding">Onboarding</option>
-              <option value="cancellation">Cancellation</option>
-              <option value="compliance">Compliance</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="priority"><span class="stepno">3</span>Priority</label>
-            <select id="priority">
-              <option value="">Select priority…</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="tier"><span class="stepno">4</span>Customer tier</label>
-            <select id="tier"><option value="">Any</option><option>free</option><option>pro</option><option>enterprise</option></select>
-          </div>
-          <div class="field">
-            <label for="channel">Channel</label>
-            <select id="channel"><option value="">Unknown</option><option>email</option><option>chat</option><option>phone</option><option>social</option></select>
-          </div>
-          <div class="field">
-            <label for="tone">Reply tone</label>
-            <select id="tone">
-              <option value="empathetic">Empathetic</option>
-              <option value="formal">Formal</option>
-              <option value="brief">Brief</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="product">Product area</label>
-            <input id="product" placeholder="e.g. checkout, mobile app">
-          </div>
-        </div>
-
-        <div class="pii">
-          <div class="lbl">PII shield — text sent to the model</div>
-          <div id="shield">(nothing yet)</div>
-        </div>
-
-        <div class="foot-actions">
-          <button type="button" id="reset">Clear</button>
-          <button type="button" class="primary" id="go">Generate ops pack</button>
-        </div>
-        <div class="msg err" id="err"></div>
+  <div class="main">
+    <div class="topbar">
+      <button type="button" class="menu-btn" id="menuBtn">History</button>
+      <div class="tabs">
+        <button type="button" id="tabDash" class="active">Dashboard</button>
+        <button type="button" id="tabWork">Triage workspace</button>
       </div>
+      <div class="sp"></div>
+      <span class="chip" id="prov">model: …</span>
+      <span class="chip" id="who"></span>
+      <button type="button" id="out">Sign out</button>
+    </div>
 
-      <div>
+    <div id="viewDash">
+      <div class="kpis">
+        <div class="kpi"><div class="k">Tickets</div><div class="v" id="kpiTotal">0</div></div>
+        <div class="kpi"><div class="k">Escalations</div><div class="v" id="kpiEsc">0</div></div>
+        <div class="kpi"><div class="k">Avg severity</div><div class="v" id="kpiSev">0</div></div>
+        <div class="kpi"><div class="k">Helpful rate</div><div class="v" id="kpiHelp">—</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>By category</h3><p class="desc">Where your workload concentrates.</p><div class="bars" id="catBars"><div class="tiny">No data yet.</div></div></div>
+        <div class="card"><h3>By queue</h3><p class="desc">Routing destinations from ops packs.</p><div class="bars" id="queueBars"><div class="tiny">No data yet.</div></div></div>
+        <div class="card"><h3>Priority mix</h3><p class="desc">Urgency distribution across history.</p><div class="bars" id="priBars"><div class="tiny">No data yet.</div></div></div>
+        <div class="card">
+          <h3>Usage & pins</h3>
+          <p class="desc">Token budget and saved tickets.</p>
+          <div class="metrics" style="margin:0">
+            <div class="metric"><div class="k">Tokens today</div><div class="v" id="kpiTok">—</div></div>
+            <div class="metric"><div class="k">Pinned</div><div class="v" id="kpiPin">0</div></div>
+            <div class="metric"><div class="k">Feedback votes</div><div class="v" id="kpiFb">0</div></div>
+            <div class="metric"><div class="k">Daily quota</div><div class="v" id="kpiQuota">—</div></div>
+          </div>
+          <div class="foot-actions" style="justify-content:flex-start">
+            <button type="button" class="primary" id="goTriage">Open triage workspace</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewWork" class="hide">
+      <div class="grid2">
+        <div class="card">
+          <h3>Ticket intake</h3>
+          <p class="desc">Suggest labels, set tone, generate ops pack. Click sidebar history to reload any previous result.</p>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="text">Customer message</label>
+              <textarea id="text" placeholder="Paste ticket…"></textarea>
+              <div class="samples" id="samples"></div>
+              <div class="foot-actions" style="border:0;padding-top:8px;margin-top:8px;justify-content:flex-start">
+                <button type="button" class="ghost" id="suggest">Auto-suggest</button>
+              </div>
+              <div class="hint-box" id="suggestHint"></div>
+            </div>
+            <div class="field"><label for="category">Category</label>
+              <select id="category"><option value="">Select…</option>
+                <option value="billing">Billing</option><option value="refund">Refund</option><option value="bug">Bug</option>
+                <option value="outage">Outage</option><option value="feature_request">Feature request</option>
+                <option value="account">Account</option><option value="security">Security</option>
+                <option value="shipping">Shipping</option><option value="onboarding">Onboarding</option>
+                <option value="cancellation">Cancellation</option><option value="compliance">Compliance</option>
+                <option value="other">Other</option></select></div>
+            <div class="field"><label for="priority">Priority</label>
+              <select id="priority"><option value="">Select…</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            <div class="field"><label for="tier">Tier</label>
+              <select id="tier"><option value="">Any</option><option>free</option><option>pro</option><option>enterprise</option></select></div>
+            <div class="field"><label for="channel">Channel</label>
+              <select id="channel"><option value="">Unknown</option><option>email</option><option>chat</option><option>phone</option><option>social</option></select></div>
+            <div class="field"><label for="tone">Reply tone</label>
+              <select id="tone"><option value="empathetic">Empathetic</option><option value="formal">Formal</option><option value="brief">Brief</option></select></div>
+            <div class="field"><label for="product">Product area</label><input id="product" placeholder="optional"></div>
+          </div>
+          <div class="pii"><div class="lbl">PII shield</div><div id="shield">(nothing yet)</div></div>
+          <div class="foot-actions">
+            <button type="button" id="reset">Clear</button>
+            <button type="button" class="primary" id="go">Generate ops pack</button>
+          </div>
+          <div class="msg err" id="err"></div>
+        </div>
         <div class="card">
           <h3>Operations result</h3>
-          <p class="desc">SLA due time, rationale, internal note, reply, and feedback.</p>
-          <div id="res"><div class="result-empty">Generate an ops pack to see results here.</div></div>
-        </div>
-        <div class="card" style="margin-top:16px">
-          <h3>Usage</h3>
-          <div class="metrics" style="margin:0">
-            <div class="metric"><div class="k">Tokens today</div><div class="v" id="tk">—</div></div>
-            <div class="metric"><div class="k">Requests / min</div><div class="v" id="rq">—</div></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:16px">
-          <h3>Session history</h3>
-          <div class="hist" id="hist"><div class="result-empty" style="padding:12px">No tickets yet.</div></div>
+          <p class="desc">Current triage or selected history ticket.</p>
+          <div id="res"><div class="result-empty">Run triage or pick an item from the left sidebar.</div></div>
         </div>
       </div>
     </div>
-    <p class="dev">Developer: <a href="/docs" target="_blank" rel="noreferrer">OpenAPI</a> <a href="/v1/taxonomy" target="_blank" rel="noreferrer">Taxonomy</a></p>
-  </section>
-</div>
+  </div>
+</section>
 
 <script>
 const $=id=>document.getElementById(id);
 let token=sessionStorage.getItem("tf_token"), user=sessionStorage.getItem("tf_user");
-let hist=[], lastJson=null;
+let historyCache=[], activeId=null, lastJson=null;
 const USER_RE=/^[a-zA-Z0-9_]{3,32}$/;
 const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
 const SAMPLES=[
@@ -262,60 +258,60 @@ const SAMPLES=[
    text:"It would be great if you could export reports to CSV for our finance team. Not urgent, just a suggestion."}
 ];
 
-function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
-function toast(msg){const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200)}
+function el(t,c,x){const e=document.createElement(t); if(c)e.className=c; if(x!==undefined)e.textContent=x; return e}
+function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200)}
 function pretty(s){return String(s||"").replaceAll("_"," ")}
 function detailMessage(d,status){
   if(!d) return "HTTP "+status;
   let m=d.detail;
-  if(Array.isArray(m)) return m.map(x=>{const f=(x.loc||[]).filter(p=>p!=="body").join(".")||"field";return f+": "+(x.msg||"invalid")}).join("; ");
+  if(Array.isArray(m)) return m.map(x=>{const f=(x.loc||[]).filter(p=>p!=="body").join(".")||"field"; return f+": "+(x.msg||"invalid")}).join("; ");
   return typeof m==="string"?m:("HTTP "+status);
 }
 async function api(path,opt={}){
   const h={...(opt.headers||{})}; if(token) h.Authorization="Bearer "+token;
   const r=await fetch(path,{...opt,headers:h});
   let d=null; try{d=await r.json()}catch{}
-  if(r.status===401&&token&&!path.includes("/auth/")){logout();throw new Error("Session expired — sign in again")}
+  if(r.status===401&&token&&!path.includes("/auth/")){logout(); throw new Error("Session expired")}
   if(!r.ok){
     let m=detailMessage(d,r.status);
     if(r.status===429) m=(m||"Rate limited")+" — retry in "+(r.headers.get("Retry-After")||"?")+"s";
-    if(r.status===409) m="Username already taken — use Sign in instead";
+    if(r.status===409) m="Username already taken — use Sign in";
     throw new Error(m);
   }
   return d;
 }
-function show(authed){
+function showApp(authed){
   $("auth").classList.toggle("hide",authed);
   $("app").classList.toggle("hide",!authed);
-  $("out").classList.toggle("hide",!authed);
-  $("who").classList.toggle("hide",!authed);
-  $("who").textContent=user?("@"+user):"";
+  if(authed){$("who").textContent="@"+user; loadHistory(); loadDashboard(); setView("dash")}
 }
-function logout(){token=user=null;sessionStorage.clear();show(false);$("aerr").textContent="";$("aok").textContent=""}
-function validateCreds(){
-  const u=$("u").value.trim(),p=$("pw").value;
-  if(!u) return "Enter a username";
-  if(!USER_RE.test(u)) return "Username: 3–32 chars, letters/numbers/underscore only";
-  if(!p||p.length<8) return "Password must be at least 8 characters";
-  return null;
+function logout(){token=user=null; sessionStorage.clear(); showApp(false); closeSide(); $("aerr").textContent=""; $("aok").textContent=""}
+function setView(which){
+  const dash=which==="dash";
+  $("viewDash").classList.toggle("hide",!dash);
+  $("viewWork").classList.toggle("hide",dash);
+  $("tabDash").classList.toggle("active",dash);
+  $("tabWork").classList.toggle("active",!dash);
+  if(dash) loadDashboard();
 }
+function openSide(){$("sidebar").classList.add("open"); $("scrim").classList.add("show")}
+function closeSide(){$("sidebar").classList.remove("open"); $("scrim").classList.remove("show")}
+
 async function signin(register){
-  $("aerr").textContent="";$("aok").textContent="";
-  const problem=validateCreds(); if(problem){$("aerr").textContent=problem;return}
-  const u=$("u").value.trim(),p=$("pw").value;
+  $("aerr").textContent=""; $("aok").textContent="";
+  const u=$("u").value.trim(), p=$("pw").value;
+  if(!USER_RE.test(u)){$("aerr").textContent="Username: 3–32 letters/numbers/_"; return}
+  if(!p||p.length<8){$("aerr").textContent="Password must be 8+ chars"; return}
   $("login").disabled=$("reg").disabled=true;
   try{
-    if(register){
-      await api("/v1/auth/register",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({username:u,password:p})});
-      $("aok").textContent="Account created — signing you in…";
-    }
+    if(register){await api("/v1/auth/register",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({username:u,password:p})}); $("aok").textContent="Account created — signing in…"}
     const d=await api("/v1/auth/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:new URLSearchParams({username:u,password:p})});
-    token=d.access_token; user=u;
-    sessionStorage.setItem("tf_token",token); sessionStorage.setItem("tf_user",u);
-    show(true); usage(); toast("Signed in");
+    token=d.access_token; user=u; sessionStorage.setItem("tf_token",token); sessionStorage.setItem("tf_user",u);
+    showApp(true); toast("Signed in");
   }catch(e){$("aerr").textContent=e.message}
   finally{$("login").disabled=$("reg").disabled=false}
 }
+
 function shield(){
   const box=$("shield"); box.textContent="";
   let t=$("text").value; if(!t){box.textContent="(nothing yet)"; return}
@@ -325,134 +321,153 @@ function shield(){
     else if(s) box.appendChild(document.createTextNode(s));
   });
 }
-async function usage(){
+
+function renderBars(target, data){
+  const box=$(target); box.textContent="";
+  const entries=Object.entries(data||{});
+  if(!entries.length){box.append(el("div","tiny","No data yet.")); return}
+  const max=Math.max(...entries.map(([,v])=>v),1);
+  entries.forEach(([k,v])=>{
+    const row=el("div","bar-row");
+    row.append(el("div","",pretty(k)));
+    const track=el("div","bar-track"); const i=el("i"); i.style.width=((v/max)*100)+"%"; track.append(i);
+    row.append(track, el("div","",String(v)));
+    box.append(row);
+  });
+}
+
+async function loadDashboard(){
   try{
-    const u=await api("/v1/usage/me");
-    $("tk").textContent=`${u.tokens_used_today} / ${u.daily_quota}`;
-    $("rq").textContent=`${u.requests_last_minute} / ${u.rate_limit_per_min}`;
-  }catch{}
+    const d=await api("/v1/dashboard");
+    $("kpiTotal").textContent=d.total_tickets;
+    $("kpiEsc").textContent=d.escalations;
+    $("kpiSev").textContent=d.avg_severity;
+    $("kpiHelp").textContent=d.helpful_rate==null?"—":Math.round(d.helpful_rate*100)+"%";
+    $("kpiTok").textContent=d.tokens_used_today;
+    $("kpiQuota").textContent=d.daily_quota;
+    $("kpiPin").textContent=d.pinned;
+    $("kpiFb").textContent=d.feedback_count;
+    renderBars("catBars", d.by_category);
+    renderBars("queueBars", d.by_queue);
+    renderBars("priBars", d.by_priority);
+  }catch(e){toast(e.message)}
 }
-function fmtDue(iso){
-  try{return new Date(iso).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}
-  catch{return iso}
+
+function renderHistory(){
+  const q=$("histSearch").value.trim().toLowerCase();
+  const list=$("histList"); list.textContent="";
+  let items=historyCache;
+  if(q) items=items.filter(i=> (i.preview+" "+i.category+" "+i.ticket_id).toLowerCase().includes(q));
+  if(!items.length){list.append(el("div","empty-side", historyCache.length?"No matches.":"No history yet. Run a triage.")); return}
+  items.forEach(item=>{
+    const btn=el("button","hist-item"+(item.ticket_id===activeId?" active":"")); btn.type="button";
+    const row=el("div","row");
+    row.append(el("span","badge "+item.priority, item.priority[0].toUpperCase()));
+    row.append(el("span","pill", pretty(item.category)));
+    const pin=el("button","pin"+(item.pinned?" on":"")); pin.type="button"; pin.textContent=item.pinned?"★":"☆"; pin.title="Pin";
+    pin.onclick=async(ev)=>{ev.stopPropagation(); await api(`/v1/history/${item.ticket_id}/pin`,{method:"POST"}); await loadHistory(); toast(item.pinned?"Unpinned":"Pinned")};
+    row.append(pin);
+    btn.append(row);
+    btn.append(el("div","preview", item.preview));
+    btn.append(el("div","meta", item.ticket_id+" · sev "+item.severity_score+" · "+pretty(item.assigned_queue)));
+    btn.onclick=()=>openHistory(item.ticket_id);
+    list.append(btn);
+  });
 }
+
+async function loadHistory(){
+  try{ historyCache=await api("/v1/history"); renderHistory(); }
+  catch(e){toast(e.message)}
+}
+
+async function openHistory(ticketId){
+  try{
+    const detail=await api("/v1/history/"+ticketId);
+    activeId=ticketId; renderHistory();
+    setView("work"); closeSide();
+    const d=detail.result;
+    $("text").value=detail.preview;
+    $("category").value=d.category||"";
+    $("priority").value=d.priority||"";
+    $("tier").value=d.customer_tier||"";
+    $("channel").value=d.channel&&d.channel!=="unknown"?d.channel:"";
+    $("tone").value=d.reply_tone||"empathetic";
+    $("product").value=d.product_area||"";
+    shield(); render(d); toast("Loaded "+ticketId);
+  }catch(e){toast(e.message)}
+}
+
+function fmtDue(iso){try{return new Date(iso).toLocaleString(undefined,{dateStyle:"medium",timeStyle:"short"})}catch{return iso}}
+
 function render(d){
-  lastJson=d;
-  const r=$("res"); r.textContent="";
+  lastJson=d; const r=$("res"); r.textContent="";
   const head=el("div","result-head");
   head.append(el("span","badge "+d.priority,d.priority));
   head.append(el("span","pill",pretty(d.category)));
   if(d.sentiment) head.append(el("span","pill",d.sentiment));
   head.append(el("span","pill",d.ticket_id));
-  r.append(head);
-  r.append(el("p","summary",d.summary));
-
-  if(d.assigned_queue==null){r.append(el("p","tiny","Classic response")); return}
+  r.append(head); r.append(el("p","summary",d.summary));
+  if(d.assigned_queue==null) return;
 
   const metrics=el("div","metrics");
-  [
-    ["Queue", pretty(d.assigned_queue)],
-    ["SLA", d.sla_hours+" hours"],
-    ["SLA due", d.sla_due_at? fmtDue(d.sla_due_at):"—"],
-    ["Severity", d.severity_score+" / 10"],
-    ["Tone", pretty(d.reply_tone||"empathetic")],
-    ["Confidence", Math.round((d.confidence||0)*100)+"%"]
-  ].forEach(([k,v])=>{const m=el("div","metric"); m.append(el("div","k",k),el("div","v",v)); metrics.append(m)});
+  [["Queue",pretty(d.assigned_queue)],["SLA",d.sla_hours+"h"],["SLA due",d.sla_due_at?fmtDue(d.sla_due_at):"—"],["Severity",d.severity_score+"/10"],["Tone",pretty(d.reply_tone||"empathetic")],["Confidence",Math.round((d.confidence||0)*100)+"%"]]
+    .forEach(([k,v])=>{const m=el("div","metric"); m.append(el("div","k",k),el("div","v",v)); metrics.append(m)});
   r.append(metrics);
 
   const sev=el("div","block"); sev.append(el("h4","","Severity"));
   const row=el("div","sev-row"); row.append(el("strong","",String(d.severity_score)));
-  const meter=el("div","meter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); row.append(meter);
-  sev.append(row); r.append(sev);
+  const meter=el("div","meter"); const i=el("i"); i.style.width=(d.severity_score*10)+"%"; meter.append(i); row.append(meter); sev.append(row); r.append(sev);
 
-  const banner=el("div", d.escalation_required?"banner hot":"banner safe");
-  banner.textContent=d.escalation_required?("Escalation required — "+d.escalation_reason):("No escalation — "+d.escalation_reason);
+  const banner=el("div",d.escalation_required?"banner hot":"banner safe");
+  banner.textContent=d.escalation_required?("Escalation — "+d.escalation_reason):("No escalation — "+d.escalation_reason);
   r.append(banner);
 
   if(d.rationale){const b=el("div","block"); b.append(el("h4","","Why this classification")); b.append(el("div","note",d.rationale)); r.append(b)}
-  if(d.internal_note){const b=el("div","block"); b.append(el("h4","","Internal note (agents only)")); b.append(el("div","note",d.internal_note)); r.append(b)}
-
+  if(d.internal_note){const b=el("div","block"); b.append(el("h4","","Internal note")); b.append(el("div","note",d.internal_note)); r.append(b)}
   if(d.risk_flags?.length){const b=el("div","block"); b.append(el("h4","","Risk flags")); const c=el("div","chips"); d.risk_flags.forEach(f=>c.appendChild(el("span","",pretty(f)))); b.append(c); r.append(b)}
-  if(d.keywords?.length){const b=el("div","block"); b.append(el("h4","","Keywords")); const c=el("div","chips"); d.keywords.forEach(f=>c.appendChild(el("span","",f))); b.append(c); r.append(b)}
-  if(d.next_actions?.length){
-    const b=el("div","block"); b.append(el("h4","","Next actions"));
-    const ul=el("ul","list"); d.next_actions.forEach((a,idx)=>{const li=el("li"); li.append(el("b","",String(idx+1)), document.createTextNode(a)); ul.append(li)});
-    b.append(ul); r.append(b);
-  }
-
+  if(d.next_actions?.length){const b=el("div","block"); b.append(el("h4","","Next actions")); const ul=el("ul","list"); d.next_actions.forEach((a,idx)=>{const li=el("li"); li.append(el("b","",String(idx+1)), document.createTextNode(a)); ul.append(li)}); b.append(ul); r.append(b)}
   if(d.suggested_reply){
-    const b=el("div","block");
-    const tools=el("div","reply-tools");
-    tools.append(el("h4","","Suggested customer reply"));
-    const cp=el("button","","Copy reply"); cp.type="button";
-    cp.onclick=async()=>{await navigator.clipboard.writeText(d.suggested_reply); toast("Reply copied")};
-    tools.append(cp); b.append(tools);
-    b.append(el("div","reply-box",d.suggested_reply));
-    r.append(b);
+    const b=el("div","block"); const tools=el("div","reply-tools"); tools.append(el("h4","","Suggested reply"));
+    const cp=el("button","","Copy reply"); cp.type="button"; cp.onclick=async()=>{await navigator.clipboard.writeText(d.suggested_reply); toast("Copied")};
+    tools.append(cp); b.append(tools); b.append(el("div","reply-box",d.suggested_reply)); r.append(b);
   }
-
-  const fb=el("div","block"); fb.append(el("h4","","Was this triage helpful?"));
+  const fb=el("div","block"); fb.append(el("h4","","Feedback"));
   const rowfb=el("div","fb");
-  const up=el("button","","Helpful"); up.type="button";
-  const down=el("button","","Needs work"); down.type="button";
-  up.onclick=()=>sendFeedback(d.ticket_id,true);
-  down.onclick=()=>sendFeedback(d.ticket_id,false);
+  const up=el("button","","Helpful"); up.type="button"; const down=el("button","","Needs work"); down.type="button";
+  up.onclick=()=>sendFeedback(d.ticket_id,true); down.onclick=()=>sendFeedback(d.ticket_id,false);
   rowfb.append(up,down); fb.append(rowfb); r.append(fb);
 
   const exportRow=el("div","foot-actions"); exportRow.style.borderTop="0"; exportRow.style.paddingTop="0";
   const cj=el("button","","Copy JSON"); cj.type="button";
   cj.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(d,null,2)); toast("JSON copied")};
-  const dl=el("button","","Download report"); dl.type="button";
-  dl.onclick=()=>downloadReport(d);
+  const dl=el("button","","Download"); dl.type="button";
+  dl.onclick=()=>{const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=d.ticket_id+"-ops-pack.json"; a.click(); URL.revokeObjectURL(a.href); toast("Downloaded")};
   exportRow.append(cj,dl); r.append(exportRow);
 }
+
 async function sendFeedback(ticketId,helpful){
-  try{
-    await api("/v1/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ticket_id:ticketId,helpful})});
-    toast(helpful?"Thanks — marked helpful":"Thanks — we'll improve");
-  }catch(e){toast(e.message)}
+  try{await api("/v1/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ticket_id:ticketId,helpful})}); toast(helpful?"Marked helpful":"Marked needs work"); loadDashboard()}
+  catch(e){toast(e.message)}
 }
-function downloadReport(d){
-  const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=`${d.ticket_id}-ops-pack.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast("Report downloaded");
-}
-function addHist(t,d){
-  hist.unshift({t,d}); const h=$("hist"); h.textContent="";
-  hist.slice(0,6).forEach(x=>{
-    const row=el("button"); row.type="button";
-    row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()));
-    row.append(el("span","t", pretty(x.d.category)+" · "+x.t));
-    row.onclick=()=>render(x.d); h.append(row);
-  });
-}
+
 async function suggest(){
-  $("err").textContent="";
-  const text=$("text").value.trim();
-  if(text.length<10){$("err").textContent="Paste a ticket first (10+ chars)"; return}
+  $("err").textContent=""; const text=$("text").value.trim();
+  if(text.length<10){$("err").textContent="Paste a ticket first"; return}
   $("suggest").disabled=true; $("suggest").textContent="Suggesting…";
   try{
     const d=await api("/v2/suggest",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text})});
-    $("category").value=d.category;
-    $("priority").value=d.priority;
-    const box=$("suggestHint");
-    box.textContent=`Suggested ${pretty(d.category)} / ${d.priority} (${Math.round(d.confidence*100)}%): ${d.rationale}`;
-    box.classList.add("show");
-    toast("Category & priority filled");
-    usage();
+    $("category").value=d.category; $("priority").value=d.priority;
+    const box=$("suggestHint"); box.textContent=`Suggested ${pretty(d.category)} / ${d.priority}: ${d.rationale}`; box.classList.add("show");
+    toast("Labels filled");
   }catch(e){$("err").textContent=e.message}
-  $("suggest").disabled=false; $("suggest").textContent="Auto-suggest category & priority";
+  $("suggest").disabled=false; $("suggest").textContent="Auto-suggest";
 }
+
 async function go(){
   $("err").textContent="";
   const category=$("category").value, priority=$("priority").value, text=$("text").value.trim();
-  if(!category){$("err").textContent="Select a category (or Auto-suggest)"; $("category").focus(); return}
-  if(!priority){$("err").textContent="Select a priority (or Auto-suggest)"; $("priority").focus(); return}
-  if(text.length<10){$("err").textContent="Paste a ticket (at least 10 characters)"; return}
+  if(!category||!priority){$("err").textContent="Select category & priority (or Auto-suggest)"; return}
+  if(text.length<10){$("err").textContent="Paste a longer ticket"; return}
   const body={category,priority,text,reply_tone:$("tone").value||"empathetic"};
   if($("tier").value) body.customer_tier=$("tier").value;
   if($("channel").value) body.channel=$("channel").value;
@@ -460,10 +475,11 @@ async function go(){
   $("go").disabled=true; $("go").textContent="Generating…";
   try{
     const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    render(d); addHist(text,d); toast("Ops pack ready");
+    activeId=d.ticket_id; render(d); await loadHistory(); loadDashboard(); toast("Ops pack ready");
   }catch(e){$("err").textContent=e.message}
-  $("go").disabled=false; $("go").textContent="Generate ops pack"; usage();
+  $("go").disabled=false; $("go").textContent="Generate ops pack";
 }
+
 function applySample(s){
   $("category").value=s.category; $("priority").value=s.priority; $("text").value=s.text;
   $("tier").value=s.tier||""; $("channel").value=s.channel||""; $("tone").value=s.tone||"empathetic";
@@ -471,20 +487,22 @@ function applySample(s){
 }
 function resetForm(){
   ["category","priority","text","tier","channel","product"].forEach(id=>$(id).value="");
-  $("tone").value="empathetic"; $("err").textContent=""; $("suggestHint").classList.remove("show"); shield();
+  $("tone").value="empathetic"; $("err").textContent=""; $("suggestHint").classList.remove("show"); shield(); activeId=null; renderHistory();
 }
-$("eye").onclick=()=>{const pw=$("pw"),show=pw.type==="password"; pw.type=show?"text":"password"; $("eye").textContent=show?"Hide":"Show"};
+
+$("eye").onclick=()=>{const pw=$("pw"), show=pw.type==="password"; pw.type=show?"text":"password"; $("eye").textContent=show?"Hide":"Show"};
 SAMPLES.forEach(s=>{const b=el("button","",s.label); b.type="button"; b.onclick=()=>applySample(s); $("samples").append(b)});
 $("text").oninput=shield;
-$("suggest").onclick=suggest;
-$("go").onclick=go;
-$("reset").onclick=resetForm;
-$("login").onclick=()=>signin(false);
-$("reg").onclick=()=>signin(true);
-$("out").onclick=logout;
+$("suggest").onclick=suggest; $("go").onclick=go; $("reset").onclick=resetForm;
+$("login").onclick=()=>signin(false); $("reg").onclick=()=>signin(true); $("out").onclick=logout;
+$("tabDash").onclick=()=>setView("dash"); $("tabWork").onclick=()=>setView("work"); $("goTriage").onclick=()=>setView("work");
+$("refreshHist").onclick=()=>loadHistory();
+$("clearHist").onclick=async()=>{if(!confirm("Clear all history?"))return; await api("/v1/history",{method:"DELETE"}); activeId=null; await loadHistory(); loadDashboard(); toast("History cleared")};
+$("histSearch").oninput=renderHistory;
+$("menuBtn").onclick=openSide; $("scrim").onclick=closeSide;
 $("pw").onkeydown=e=>{if(e.key==="Enter") signin(false)};
 fetch("/readyz").then(r=>r.json()).then(d=>{$("prov").textContent="model: "+(d.provider||"offline"); if(d.provider)$("prov").classList.add("ok")});
-if(token){show(true); usage()}
+if(token) showApp(true);
 </script>
 </body>
 </html>

@@ -82,5 +82,95 @@ class FeedbackStore:
             }
         )
 
-    def count(self) -> int:
-        return len(self._items)
+    def count(self, username: str | None = None) -> int:
+        if username is None:
+            return len(self._items)
+        return sum(1 for i in self._items if i["username"] == username)
+
+    def helpful_rate(self, username: str) -> float | None:
+        mine = [i for i in self._items if i["username"] == username]
+        if not mine:
+            return None
+        return sum(1 for i in mine if i["helpful"]) / len(mine)
+
+
+class HistoryStore:
+    """Per-user triage history for sidebar + dashboard (in-memory demo store)."""
+
+    def __init__(self, max_per_user: int = 50) -> None:
+        self._max = max_per_user
+        self._items: dict[str, list[dict[str, object]]] = defaultdict(list)
+
+    def add(self, username: str, preview: str, result: dict[str, object]) -> dict[str, object]:
+        item: dict[str, object] = {
+            "ticket_id": str(result.get("ticket_id", "")),
+            "preview": preview[:140],
+            "pinned": False,
+            "created_at": datetime.now(UTC).isoformat(),
+            "result": result,
+        }
+        bucket = self._items[username]
+        bucket.insert(0, item)
+        del bucket[self._max :]
+        return item
+
+    def list(self, username: str) -> list[dict[str, object]]:
+        return list(self._items.get(username, []))
+
+    def get(self, username: str, ticket_id: str) -> dict[str, object] | None:
+        for item in self._items.get(username, []):
+            if item["ticket_id"] == ticket_id:
+                return item
+        return None
+
+    def delete(self, username: str, ticket_id: str) -> bool:
+        bucket = self._items.get(username, [])
+        before = len(bucket)
+        self._items[username] = [i for i in bucket if i["ticket_id"] != ticket_id]
+        return len(self._items[username]) < before
+
+    def toggle_pin(self, username: str, ticket_id: str) -> dict[str, object] | None:
+        item = self.get(username, ticket_id)
+        if item is None:
+            return None
+        item["pinned"] = not bool(item["pinned"])
+        bucket = self._items[username]
+        pinned = [i for i in bucket if i["pinned"]]
+        rest = [i for i in bucket if not i["pinned"]]
+        self._items[username] = pinned + rest
+        return item
+
+    def clear(self, username: str) -> int:
+        n = len(self._items.get(username, []))
+        self._items[username] = []
+        return n
+
+    def stats(self, username: str) -> dict[str, int | float | dict[str, int]]:
+        items = self._items.get(username, [])
+        by_category: dict[str, int] = defaultdict(int)
+        by_priority: dict[str, int] = defaultdict(int)
+        by_queue: dict[str, int] = defaultdict(int)
+        escalations = 0
+        severity_sum = 0
+        for item in items:
+            result = item["result"]
+            assert isinstance(result, dict)
+            cat = str(result.get("category", "other"))
+            pri = str(result.get("priority", "medium"))
+            queue = str(result.get("assigned_queue", "general_support"))
+            by_category[cat] += 1
+            by_priority[pri] += 1
+            by_queue[queue] += 1
+            if result.get("escalation_required"):
+                escalations += 1
+            severity_sum += int(result.get("severity_score", 0) or 0)
+        total = len(items)
+        return {
+            "total_tickets": total,
+            "escalations": escalations,
+            "avg_severity": round(severity_sum / total, 2) if total else 0.0,
+            "by_category": dict(sorted(by_category.items(), key=lambda kv: (-kv[1], kv[0]))),
+            "by_priority": dict(by_priority),
+            "by_queue": dict(sorted(by_queue.items(), key=lambda kv: (-kv[1], kv[0]))),
+            "pinned": sum(1 for i in items if i["pinned"]),
+        }

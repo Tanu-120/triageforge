@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 
 from .config import Settings, get_settings
-from .controls import FeedbackStore, RateLimiter, UsageMeter, UserStore
+from .controls import FeedbackStore, HistoryStore, RateLimiter, UsageMeter, UserStore
 from .providers import LLMProvider
 from .security import decode_token
 
@@ -33,11 +33,16 @@ def get_feedback(request: Request) -> FeedbackStore:
     return request.app.state.feedback  # type: ignore[no-any-return]
 
 
+def get_history(request: Request) -> HistoryStore:
+    return request.app.state.history  # type: ignore[no-any-return]
+
+
 ProviderDep = Annotated[LLMProvider, Depends(get_provider)]
 UsersDep = Annotated[UserStore, Depends(get_users)]
 LimiterDep = Annotated[RateLimiter, Depends(get_limiter)]
 MeterDep = Annotated[UsageMeter, Depends(get_meter)]
 FeedbackDep = Annotated[FeedbackStore, Depends(get_feedback)]
+HistoryDep = Annotated[HistoryStore, Depends(get_history)]
 
 
 def current_user(token: Annotated[str, Depends(oauth2)], s: SettingsDep, users: UsersDep) -> str:
