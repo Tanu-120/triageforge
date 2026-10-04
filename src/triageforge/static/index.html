@@ -27,17 +27,38 @@ textarea{min-height:130px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wr
 .bar{height:8px;border-radius:9px;background:var(--bg);border:1px solid var(--line);overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .4s}
 .reply{white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:10px;margin-top:6px}
 .err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+.okmsg{color:var(--ok);font-size:13px;margin-top:8px;min-height:18px}
 .hist div{padding:8px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13px}
 .hist span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-#auth{max-width:380px;margin:60px auto;padding:20px}#auth input{margin-bottom:10px}
+#auth{max-width:400px;margin:60px auto;padding:20px}
+#auth .hint{font-size:12px;color:var(--mute);margin:-4px 0 12px}
+.field{margin-bottom:12px}.field label{display:block;font-size:12px;color:var(--mute);margin-bottom:4px}
+.pw-wrap{position:relative;display:flex;align-items:center}
+.pw-wrap input{padding-right:44px;margin:0}
+.pw-wrap .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);padding:6px 10px;line-height:1;font-size:16px}
+.pw-wrap .eye:hover{color:var(--ink)}
 .hide{display:none!important}.empty{color:var(--mute);font-size:14px}
 </style></head><body>
 <header><div class="logo">Triage<b>Forge</b></div><span class="pill" id="prov">…</span><div class="sp"></div>
-<span class="pill hide" id="who"></span><button id="theme" title="Toggle theme">◐</button><button id="out" class="hide">Sign out</button></header>
+<span class="pill hide" id="who"></span><button type="button" id="theme" title="Toggle theme">◐</button><button type="button" id="out" class="hide">Sign out</button></header>
 
-<section id="auth" class="card"><h2>Sign in</h2>
-<input id="u" placeholder="username" autocomplete="username"><input id="pw" type="password" placeholder="password (min 8)" autocomplete="current-password">
-<div class="row"><button class="p" id="login">Sign in</button><button id="reg">Create account</button></div><div class="err" id="aerr"></div></section>
+<section id="auth" class="card">
+ <h2>Sign in</h2>
+ <p class="hint">Username: letters, numbers, underscore (3–32). Password: at least 8 characters.</p>
+ <div class="field"><label for="u">Username</label>
+  <input id="u" name="username" placeholder="e.g. demo_user" autocomplete="username" spellcheck="false"></div>
+ <div class="field"><label for="pw">Password</label>
+  <div class="pw-wrap">
+   <input id="pw" name="password" type="password" placeholder="min 8 characters" autocomplete="current-password">
+   <button type="button" class="eye" id="eye" title="Show password" aria-label="Show password">👁</button>
+  </div></div>
+ <div class="row">
+  <button type="button" class="p" id="login">Sign in</button>
+  <button type="button" id="reg">Create account</button>
+ </div>
+ <div class="err" id="aerr"></div>
+ <div class="okmsg" id="aok"></div>
+</section>
 
 <main id="app" class="hide">
 <div>
@@ -46,7 +67,7 @@ textarea{min-height:130px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wr
   <div class="row" id="samples"></div>
   <div class="shield">🛡 <b>PII shield</b> — what the model will actually see:<div class="view" id="shield">(nothing yet)</div></div>
   <div class="row"><select id="tier" style="width:auto"><option value="">tier: any</option><option>free</option><option>pro</option><option>enterprise</option></select>
-  <div class="sp"></div><button class="p" id="go">Triage ticket</button></div><div class="err" id="err"></div></div>
+  <div class="sp"></div><button type="button" class="p" id="go">Triage ticket</button></div><div class="err" id="err"></div></div>
  <div class="card" style="margin-top:16px"><h2>Session history</h2><div class="hist" id="hist"><div class="empty" style="border:0;cursor:default">No tickets yet.</div></div></div>
 </div>
 <div>
@@ -57,46 +78,193 @@ textarea{min-height:130px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wr
 </div></main>
 
 <script>
-const $=id=>document.getElementById(id);let token=sessionStorage.getItem("tf_token"),user=sessionStorage.getItem("tf_user"),hist=[];
+const $=id=>document.getElementById(id);
+let token=sessionStorage.getItem("tf_token"),user=sessionStorage.getItem("tf_user"),hist=[];
 const SAMPLES={"💳 Double charge":"I was charged twice this month and nobody answers. Email me at jane.doe@example.com or call +1 415 555 2671 ASAP, this is unacceptable.",
 "🐞 App crash":"The mobile app crashes with an error every time I open the invoices tab. Started after the last update.",
 "✨ Feature idea":"It would be great if you could export reports to CSV. Not urgent, just a suggestion from our team.",
 "🔑 Locked out":"I cannot login, the password reset email never arrives. Card on file 4242 4242 4242 4242 if you need to verify."};
 const PII=[["EMAIL",/[\w.+-]+@[\w-]+\.[\w.-]+/g],["CARD",/\b(?:\d[ -]?){13,16}\b/g],["PHONE",/(?<!\w)\+?\d[\d\s().-]{8,14}\d(?!\w)/g]];
+const USER_RE=/^[a-zA-Z0-9_]{3,32}$/;
+
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
-async function api(path,opt={}){const h={...(opt.headers||{})};if(token)h.Authorization="Bearer "+token;
- const r=await fetch(path,{...opt,headers:h});let d=null;try{d=await r.json()}catch{}
- if(r.status===401&&token&&!path.includes("/auth/")){logout();throw new Error("Session expired — sign in again")}
- if(!r.ok){let m=d&&d.detail;if(Array.isArray(m))m=m.map(x=>x.msg).join("; ");
-  if(r.status===429)m=(m||"Rate limited")+" — retry in "+(r.headers.get("Retry-After")||"?")+"s";
-  throw new Error(m||("HTTP "+r.status))}return d}
-function show(authed){$("auth").classList.toggle("hide",authed);$("app").classList.toggle("hide",!authed);$("out").classList.toggle("hide",!authed);$("who").classList.toggle("hide",!authed);$("who").textContent="👤 "+(user||"")}
-function logout(){token=user=null;sessionStorage.clear();show(false)}
-async function signin(register){$("aerr").textContent="";const u=$("u").value.trim(),p=$("pw").value;
- try{if(register)await api("/v1/auth/register",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({username:u,password:p})});
-  const d=await api("/v1/auth/token",{method:"POST",body:new URLSearchParams({username:u,password:p})});
-  token=d.access_token;user=u;sessionStorage.setItem("tf_token",token);sessionStorage.setItem("tf_user",u);show(true);usage()}catch(e){$("aerr").textContent=e.message}}
-function shield(){const box=$("shield");box.textContent="";let t=$("text").value;if(!t){box.textContent="(nothing yet)";return}
- for(const[l,re]of PII)t=t.replace(re,"\u0001"+l+"\u0002");
- t.split(/(\u0001\w+\u0002)/).forEach(s=>{if(s[0]==="\u0001")box.appendChild(el("span","tag","["+s.slice(1,-1)+"]"));else if(s)box.appendChild(document.createTextNode(s))})}
+
+function detailMessage(d,status){
+  if(!d) return "HTTP "+status;
+  let m=d.detail;
+  if(Array.isArray(m)){
+    return m.map(x=>{
+      const field=(x.loc||[]).filter(p=>p!=="body"&&p!=="query").join(".")||"field";
+      return field+": "+(x.msg||"invalid");
+    }).join("; ");
+  }
+  if(typeof m==="string") return m;
+  return "HTTP "+status;
+}
+
+async function api(path,opt={}){
+  const h={...(opt.headers||{})};
+  if(token) h.Authorization="Bearer "+token;
+  const r=await fetch(path,{...opt,headers:h});
+  let d=null; try{d=await r.json()}catch{}
+  if(r.status===401&&token&&!path.includes("/auth/")){logout();throw new Error("Session expired — sign in again")}
+  if(!r.ok){
+    let m=detailMessage(d,r.status);
+    if(r.status===429) m=(m||"Rate limited")+" — retry in "+(r.headers.get("Retry-After")||"?")+"s";
+    if(r.status===409) m="Username already taken — try Sign in instead";
+    throw new Error(m||("HTTP "+r.status));
+  }
+  return d;
+}
+
+function show(authed){
+  $("auth").classList.toggle("hide",authed);
+  $("app").classList.toggle("hide",!authed);
+  $("out").classList.toggle("hide",!authed);
+  $("who").classList.toggle("hide",!authed);
+  $("who").textContent=(user||"");
+}
+
+function logout(){token=user=null;sessionStorage.clear();show(false);$("aerr").textContent="";$("aok").textContent=""}
+
+function validateCreds(){
+  const u=$("u").value.trim(), p=$("pw").value;
+  if(!u) return "Enter a username";
+  if(!USER_RE.test(u)) return "Username must be 3–32 chars: letters, numbers, underscore only (no spaces or email)";
+  if(!p) return "Enter a password";
+  if(p.length<8) return "Password must be at least 8 characters";
+  if(p.length>72) return "Password must be at most 72 characters";
+  return null;
+}
+
+function setBusy(busy){
+  $("login").disabled=busy; $("reg").disabled=busy;
+  $("login").textContent=busy?"Working…":"Sign in";
+  $("reg").textContent=busy?"Working…":"Create account";
+}
+
+async function signin(register){
+  $("aerr").textContent=""; $("aok").textContent="";
+  const problem=validateCreds();
+  if(problem){$("aerr").textContent=problem;return}
+  const u=$("u").value.trim(), p=$("pw").value;
+  setBusy(true);
+  try{
+    if(register){
+      await api("/v1/auth/register",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({username:u,password:p})
+      });
+      $("aok").textContent="Account created — signing you in…";
+    }
+    const body=new URLSearchParams({username:u,password:p});
+    const d=await api("/v1/auth/token",{
+      method:"POST",
+      headers:{"content-type":"application/x-www-form-urlencoded"},
+      body
+    });
+    token=d.access_token; user=u;
+    sessionStorage.setItem("tf_token",token);
+    sessionStorage.setItem("tf_user",u);
+    show(true); usage();
+  }catch(e){
+    $("aerr").textContent=e.message||String(e);
+    $("aok").textContent="";
+  }finally{setBusy(false)}
+}
+
+function shield(){
+  const box=$("shield"); box.textContent="";
+  let t=$("text").value; if(!t){box.textContent="(nothing yet)";return}
+  for(const[l,re]of PII) t=t.replace(re,"\u0001"+l+"\u0002");
+  t.split(/(\u0001\w+\u0002)/).forEach(s=>{
+    if(s[0]==="\u0001") box.appendChild(el("span","tag","["+s.slice(1,-1)+"]"));
+    else if(s) box.appendChild(document.createTextNode(s));
+  });
+}
+
 function bar(i,used,max){$(i).style.width=Math.min(100,max?used/max*100:0)+"%"}
-async function usage(){try{const u=await api("/v1/usage/me");$("tk").textContent=`${u.tokens_used_today} / ${u.daily_quota}`;$("rq").textContent=`${u.requests_last_minute} / ${u.rate_limit_per_min}`;bar("tkb",u.tokens_used_today,u.daily_quota);bar("rqb",u.requests_last_minute,u.rate_limit_per_min)}catch{}}
-function render(d){const r=$("res");r.className="";r.textContent="";
- const top=el("div","row");top.style.marginTop="0";top.append(el("span","badge "+d.priority,d.priority.toUpperCase()),el("span","chip",d.category.replace("_"," ")),el("span","chip",d.sentiment),el("span","chip",d.ticket_id));r.append(top);
- r.append(el("p","",d.summary));
- const g=el("div","grid");[["Confidence",Math.round(d.confidence*100)+"%"],["Latency",d.latency_ms+" ms"],["Model",d.model],["Tokens",d.usage.prompt_tokens+" in / "+d.usage.completion_tokens+" out"]].forEach(([k,v])=>{const c=el("div");c.append(el("div","k",k),el("div","v",v));g.append(c)});r.append(g);
- const cb=el("div","bar");const ci=el("i");ci.style.width=d.confidence*100+"%";cb.append(ci);r.append(cb);
- const pk=Object.entries(d.pii_redacted);r.append(el("div","k","PII masked before inference"),el("div","v",pk.length?pk.map(([k,v])=>`${v} ${k}`).join(", "):"none found"));
- const hd=el("div","row");hd.append(el("div","k","Suggested reply"),el("div","sp"));const cp=el("button","","Copy");cp.onclick=()=>{navigator.clipboard.writeText(d.suggested_reply);cp.textContent="Copied ✓"};hd.append(cp);r.append(hd,el("div","reply",d.suggested_reply))}
-function addHist(t,d){hist.unshift({t,d});const h=$("hist");h.textContent="";hist.slice(0,8).forEach(x=>{const row=el("div");row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()),el("span","t",x.t));row.onclick=()=>render(x.d);h.append(row)})}
-async function go(){$("err").textContent="";const text=$("text").value.trim();const body={text};if($("tier").value)body.customer_tier=$("tier").value;
- $("go").disabled=true;$("go").textContent="Thinking…";
- try{const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});render(d);addHist(text,d)}catch(e){$("err").textContent=e.message}
- $("go").disabled=false;$("go").textContent="Triage ticket";usage()}
-Object.keys(SAMPLES).forEach(k=>{const b=el("button","chip",k);b.onclick=()=>{$("text").value=SAMPLES[k];shield()};$("samples").append(b)});
-$("text").oninput=shield;$("go").onclick=go;$("login").onclick=()=>signin(false);$("reg").onclick=()=>signin(true);$("out").onclick=logout;
+
+async function usage(){
+  try{
+    const u=await api("/v1/usage/me");
+    $("tk").textContent=`${u.tokens_used_today} / ${u.daily_quota}`;
+    $("rq").textContent=`${u.requests_last_minute} / ${u.rate_limit_per_min}`;
+    bar("tkb",u.tokens_used_today,u.daily_quota);
+    bar("rqb",u.requests_last_minute,u.rate_limit_per_min);
+  }catch{}
+}
+
+function render(d){
+  const r=$("res"); r.className=""; r.textContent="";
+  const top=el("div","row"); top.style.marginTop="0";
+  top.append(
+    el("span","badge "+d.priority,d.priority.toUpperCase()),
+    el("span","chip",d.category.replace("_"," ")),
+    el("span","chip",d.sentiment),
+    el("span","chip",d.ticket_id)
+  );
+  r.append(top); r.append(el("p","",d.summary));
+  const g=el("div","grid");
+  [["Confidence",Math.round(d.confidence*100)+"%"],["Latency",d.latency_ms+" ms"],["Model",d.model],["Tokens",d.usage.prompt_tokens+" in / "+d.usage.completion_tokens+" out"]]
+    .forEach(([k,v])=>{const c=el("div");c.append(el("div","k",k),el("div","v",v));g.append(c)});
+  r.append(g);
+  const cb=el("div","bar"); const ci=el("i"); ci.style.width=d.confidence*100+"%"; cb.append(ci); r.append(cb);
+  const pk=Object.entries(d.pii_redacted||{});
+  r.append(el("div","k","PII masked before inference"),el("div","v",pk.length?pk.map(([k,v])=>`${v} ${k}`).join(", "):"none found"));
+  const hd=el("div","row"); hd.append(el("div","k","Suggested reply"),el("div","sp"));
+  const cp=el("button","","Copy"); cp.type="button";
+  cp.onclick=()=>{navigator.clipboard.writeText(d.suggested_reply);cp.textContent="Copied ✓"};
+  hd.append(cp); r.append(hd,el("div","reply",d.suggested_reply));
+}
+
+function addHist(t,d){
+  hist.unshift({t,d}); const h=$("hist"); h.textContent="";
+  hist.slice(0,8).forEach(x=>{
+    const row=el("div");
+    row.append(el("span","badge "+x.d.priority,x.d.priority[0].toUpperCase()),el("span","t",x.t));
+    row.onclick=()=>render(x.d); h.append(row);
+  });
+}
+
+async function go(){
+  $("err").textContent="";
+  const text=$("text").value.trim();
+  const body={text}; if($("tier").value) body.customer_tier=$("tier").value;
+  $("go").disabled=true; $("go").textContent="Thinking…";
+  try{
+    const d=await api("/v2/triage",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    render(d); addHist(text,d);
+  }catch(e){$("err").textContent=e.message}
+  $("go").disabled=false; $("go").textContent="Triage ticket"; usage();
+}
+
+$("eye").onclick=()=>{
+  const pw=$("pw"); const show=pw.type==="password";
+  pw.type=show?"text":"password";
+  $("eye").textContent=show?"🙈":"👁";
+  $("eye").title=show?"Hide password":"Show password";
+  $("eye").setAttribute("aria-label",show?"Hide password":"Show password");
+};
+
+Object.keys(SAMPLES).forEach(k=>{
+  const b=el("button","chip",k); b.type="button";
+  b.onclick=()=>{$("text").value=SAMPLES[k];shield()};
+  $("samples").append(b);
+});
+$("text").oninput=shield;
+$("go").onclick=go;
+$("login").onclick=()=>signin(false);
+$("reg").onclick=()=>signin(true);
+$("out").onclick=logout;
 $("pw").onkeydown=e=>{if(e.key==="Enter")signin(false)};
-$("theme").onclick=()=>{const r=document.documentElement;const dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#14130f";r.dataset.theme=dark?"light":"dark"};
+$("u").onkeydown=e=>{if(e.key==="Enter")$("pw").focus()};
+$("theme").onclick=()=>{
+  const r=document.documentElement;
+  const dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#14130f";
+  r.dataset.theme=dark?"light":"dark";
+};
 fetch("/readyz").then(r=>r.json()).then(d=>$("prov").textContent="model: "+(d.provider||"offline")).catch(()=>$("prov").textContent="model: offline");
 if(token){show(true);usage()}
 </script></body></html>

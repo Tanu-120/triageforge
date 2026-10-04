@@ -35,9 +35,18 @@ app.include_router(auth.router)
 app.include_router(triage.router)
 
 
-_INDEX = Path(__file__).parent / "static" / "index.html"
+def _console_index() -> Path:
+    """Prefer package static; fall back to repo src/ during local edits."""
+    packaged = Path(__file__).parent / "static" / "index.html"
+    if packaged.is_file():
+        return packaged
+    return Path(__file__).resolve().parents[2] / "src" / "triageforge" / "static" / "index.html"
 
 
 @app.get("/", include_in_schema=False)
 def console() -> FileResponse:
-    return FileResponse(_INDEX, media_type="text/html")
+    return FileResponse(
+        _console_index(),
+        media_type="text/html",
+        headers={"Cache-Control": "no-store"},
+    )
